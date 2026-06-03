@@ -26,15 +26,15 @@ Turn 5: Going with transactions. Can you sketch the pytest fixture?
 
 ## Benchmark results
 
-Sonnet 4.6 + Opus 4.7, n=50 runs each, 5 turns per run, v0.1.0 cheatsheet.
+Sonnet 4.6 + Opus 4.8, n=50 runs each, 5 turns per run, cheatsheet v1.
 
 | variant | sonnet billed Δ | sonnet quality (mean) | opus billed Δ | opus quality |
 | --- | ---: | ---: | ---: | ---: |
-| baseline | — | 4.88 | — | 4.98 |
-| terse | -22% | 4.90 | -20% | 4.96 |
-| **mormor** | **-36%** | **4.87** | **-32%** | **4.92** |
+| baseline | — | 4.88 | — | 4.99 |
+| terse | -22% | 4.90 | -16% | 4.97 |
+| **mormor** | **-36%** | **4.87** | **-40%** | **4.96** |
 
-note: mormor stays within 0.06 of baseline quality on both models. Compression gap to terse is modest here (~14pts sonnet, ~12pts opus) — cache_read dominates the bill in this scenario, so the variable portion is small. Per-turn quality holds even on the densest turn.
+note: mormor stays within 0.06 of baseline quality on both models. Compression gap to terse is ~14pts on Sonnet and ~24pts on Opus 4.8 (terse compresses only -16% here, so mormor's structured form pulls well ahead) — cache_read dominates the bill in this scenario, so the absolute spend is small either way. Per-turn quality holds even on the densest turn.
 
 ## Sample exchange — Sonnet, run 0, mormor variant (full 5 turns)
 

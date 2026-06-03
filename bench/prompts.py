@@ -3,7 +3,7 @@
 Three system prompts are benchmarked side-by-side per scenario:
 - BASELINE_SYSTEM:  bare "helpful agent" — no guidance; the true reference
 - TERSE_SYSTEM:     one line of "be concise" — what a developer writes when they want brevity
-- MORMOR_CHEATSHEET: loaded at startup from CHEATSHEET.md by `run.py`
+- MORMOR_CHEATSHEET: loaded at startup from the default cheatsheet (`cheatsheets/<DEFAULT>.md`) by `run.py`
 
 The three points test the full cheatsheet (labels + compression + form + behavior + precedence)
 against reasonable alternatives a developer would actually write. Baseline shows default model
@@ -40,7 +40,7 @@ def system_for(variant):
     }[variant]
 
 
-# Production set is 6 labels — see CHEATSHEET.md for the canonical list.
+# Production set is 6 labels — see cheatsheets/v1.md for the canonical list.
 MORMOR_LABELS = ('goal:', 'note:', 'case:', 'done:', 'ask:', 'test:')
 
 
@@ -59,9 +59,9 @@ _LABEL_AT_LINE_START = re.compile(
 )
 
 
-# Match an atomic-form response per CHEATSHEET.md:40 — "just a number, yes/no,
-# or status code with NO accompanying context: emit that value alone". The
-# example at CHEATSHEET.md:50-53 is `42`. We accept the whole response being
+# Match an atomic-form response per the cheatsheet's atomic-output rule — "just
+# a number, yes/no, or status code with NO accompanying context: emit that value
+# alone" (the cheatsheet's example is `42`). We accept the whole response being
 # (optional whitespace) + (signed int/decimal | yes | no) + (optional terminal
 # punctuation) + (optional whitespace). Anything else (e.g. "yes, because foo",
 # "42 records", "200 OK") fails — it has accompanying context, so per the
@@ -75,7 +75,7 @@ _ATOMIC_RESPONSE = re.compile(
 def detect_mormor_format(text):
     """Binary: is the response in a Mormor-compliant form?
 
-    Two shapes count as compliant per CHEATSHEET.md:
+    Two shapes count as compliant per cheatsheets/v1.md:
       - labeled — any of the 6 labels appears at line start (the common case)
       - atomic  — the entire response is a bare number, yes, or no
                   (allowed only when the prompt has no accompanying context;

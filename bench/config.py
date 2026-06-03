@@ -22,7 +22,7 @@ import os
 # introduces protocol-compliance noise, and prior runs showed its quality is
 # more variable.
 MODELS = [
-    ('opus',   'claude-opus-4-7'),
+    ('opus',   'claude-opus-4-8'),
     ('sonnet', 'claude-sonnet-4-6'),
 ]
 

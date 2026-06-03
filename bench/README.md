@@ -178,7 +178,7 @@ Edit `config.py` to retarget models or change cost weights. Edit `scenarios.py` 
 
 ## Limitations
 
-- Two production models tested (Sonnet 4.6, Opus 4.7). Smaller / faster models can be added to `MODELS` if useful.
+- Two production models tested (Sonnet 4.6, Opus 4.8; earlier Opus 4.7 results retained in the README's "Earlier results"). Smaller / faster models can be added to `MODELS` if useful.
 - Five scenarios. Coverage is intentionally narrow but representative; broader workload coverage is a future expansion.
 - Quality grader is itself a model. We use a constant grader and per-scenario rubrics to mitigate, but absolute quality scores are noisier than relative comparisons.
 - Cache-aware billed cost uses standard public-pricing weights. Your actual cost depends on your contract.
@@ -192,7 +192,7 @@ python run.py
 
 Default settings = opus + sonnet, all 5 scenarios, RUNS=5, full 6-label cheatsheet. Output lands in `bench/results/<DATE>_<TIME>_<MODEL>_cheatsheet/`.
 
-The README's headline numbers come from a canonical run with `--runs 50` (label `v0.1.0-final-n50`) — same script, just more samples per cell for tighter confidence intervals (~8h wall time per model when running 3 variants together, ~20h sequential).
+The README's headline numbers come from canonical runs with `--runs 50` (label `v0.1.0-final-n50`) — same script, just more samples per cell for tighter confidence intervals (~6–8h wall time per model with the 3 variants split across parallel processes, ~20h sequential). The current Opus column is a 4.8 re-run done after that model's release; earlier Opus 4.7 results are retained under the README's "Earlier results".
 
 For ~half the wall time, split per-model and run them in parallel — each writes to its own per-run folder:
 

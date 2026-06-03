@@ -26,15 +26,15 @@ The benchmark runs 5 different subjects through this template:
 
 ## Benchmark results
 
-Sonnet 4.6 + Opus 4.7, n=50 runs × 5 emails each, v0.1.0 cheatsheet.
+Sonnet 4.6 + Opus 4.8, n=50 runs × 5 emails each, cheatsheet v1.
 
 | variant | sonnet billed Δ | sonnet quality | opus billed Δ | opus quality |
 | --- | ---: | ---: | ---: | ---: |
 | baseline (verbose prose) | — | 5.00 | — | 5.00 |
-| terse (concise prose) | -28% | 5.00 | +15% | 5.00 |
-| **mormor** | **-20%** | **5.00** | **-26%** | **5.00** |
+| terse (concise prose) | -28% | 5.00 | -4% | 5.00 |
+| **mormor** | **-20%** | **5.00** | **-24%** | **5.00** |
 
-note: mormor's smallest wins are in this scenario, on both models — the baseline is already very brief (one-line classification + reason), leaving little prose for the protocol to compress. Quality is perfect (5.00 across the board); compression is marginal but positive. Notably, **opus terse regresses (+15%)** — asking opus to "be concise" inflates the bill on already-tiny outputs, while mormor's structured form still nets a small win (-26%).
+note: mormor's smallest wins are in this scenario, on both models — the baseline is already very brief (one-line classification + reason), leaving little prose for the protocol to compress. Quality is perfect (5.00 across the board); compression is marginal but positive (-20% sonnet, -24% opus 4.8). On the earlier Opus 4.7 run, terse actually *regressed* here (+15% — asking opus to "be concise" inflated the bill on already-tiny outputs); on Opus 4.8 that's gone (terse -4%), and mormor's structured form still edges ahead at -24%.
 
 ## Sample responses (Sonnet, first email — `Your order #12345 has shipped` → transactional)
 
@@ -72,4 +72,4 @@ note: visible output is similar between terse and mormor on this scenario (~25 t
 
 ## Atomic-output note
 
-The c4 cheatsheet reserves atomic-output (bare value, no labels) for **just numbers, yes/no, or status codes with no context** — like `42` or `yes`. A category name like `transactional` is "nameable", which counts as multi-part per the cheatsheet, so it goes under `### done:`. Even when the prompt asks for only the category with no reason, the labeled form is the protocol-compliant shape.
+Cheatsheet v1 reserves atomic-output (bare value, no labels) for **just numbers, yes/no, or status codes with no context** — like `42` or `yes`. A category name like `transactional` is "nameable", which counts as multi-part per the cheatsheet, so it goes under `### done:`. Even when the prompt asks for only the category with no reason, the labeled form is the protocol-compliant shape.

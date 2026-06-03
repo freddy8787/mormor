@@ -1,6 +1,16 @@
 # Changelog
 
-Mormor follows [SemVer](https://semver.org/). 0.x is experimental — minor bumps may change the label set or behavior rules.
+Mormor uses two independent version axes:
+
+- **Cheatsheet version** (`v1`, `v2`, …) — the protocol artifact itself; bumps when the cheatsheet body changes. Every version is frozen in [`cheatsheets/`](./cheatsheets/); `cheatsheets/DEFAULT` names the recommended pick.
+- **Repo / release version** — [SemVer](https://semver.org/), the entries below. A cheatsheet change is a **minor** bump; benchmark re-runs, docs, and tooling are **patch** bumps with the cheatsheet unchanged. 0.x is experimental.
+
+## [0.1.1] — 2026-05-29
+
+Maintenance — **cheatsheet unchanged (still v1)**.
+
+- Re-validated on Opus 4.8 (n=50) after its release. The headline numbers in [`README.md`](./README.md) now use Opus 4.8; the earlier Opus 4.7 results moved to the README's "Earlier results" section. Aggregate held: mormor ~-50% billed vs baseline, quality 4.82.
+- Introduced cheatsheet versioning: frozen versions under [`cheatsheets/`](./cheatsheets/) (v1), with `cheatsheets/DEFAULT` naming the recommended pick.
 
 ## [0.1.0] — 2026-05-15
 

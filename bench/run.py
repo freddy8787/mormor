@@ -65,9 +65,10 @@ def _build_parser():
     )
     p.add_argument(
         '--system-prompt', choices=('cheatsheet',), default='cheatsheet',
-        help='Mormor system prompt source. "cheatsheet" (default) loads '
-             '../CHEATSHEET.md. Use --system-prompt-file for arbitrary '
-             'paths (e.g. when comparing candidate revisions).',
+        help='Mormor system prompt source. "cheatsheet" (default) loads the '
+             'curated default frozen version (../cheatsheets/<DEFAULT>.md). '
+             'Use --system-prompt-file for arbitrary paths (e.g. when '
+             'comparing candidate revisions).',
     )
     p.add_argument(
         '--system-prompt-file',
@@ -106,9 +107,15 @@ def _resolve_system_prompt(args, parser):
         path = os.path.abspath(args.system_prompt_file)
         label = os.path.splitext(os.path.basename(path))[0]
     else:
-        # Only "cheatsheet" is supported. Custom paths still
-        # work via --system-prompt-file.
-        path = os.path.join(project_root, 'CHEATSHEET.md')
+        # Load the cheatsheet version named in cheatsheets/DEFAULT (the
+        # recommended pick); the existence check below reports a clear error
+        # if the cheatsheets/ layout is missing.
+        ver = 'v1'
+        default_ptr = os.path.join(project_root, 'cheatsheets', 'DEFAULT')
+        if os.path.exists(default_ptr):
+            with open(default_ptr) as f:
+                ver = f.read().strip() or ver
+        path = os.path.join(project_root, 'cheatsheets', f'{ver}.md')
         label = 'cheatsheet'
 
     if not os.path.exists(path):

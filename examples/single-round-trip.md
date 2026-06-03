@@ -16,15 +16,15 @@ endpoints.
 
 ## Benchmark results
 
-Sonnet 4.6 + Opus 4.7, n=50 runs each, v0.1.0 cheatsheet.
+Sonnet 4.6 + Opus 4.8, n=50 runs each, cheatsheet v1.
 
 | variant | sonnet billed Δ | sonnet quality | opus billed Δ | opus quality |
 | --- | ---: | ---: | ---: | ---: |
-| baseline (verbose prose) | — | 4.94 | — | 5.00 |
-| terse (concise prose) | -30% | 4.94 | -11% | 4.98 |
-| **mormor** | **-60%** | **3.94** | **-57%** | **4.62** |
+| baseline (verbose prose) | — | 4.94 | — | 4.98 |
+| terse (concise prose) | -30% | 4.94 | -31% | 4.92 |
+| **mormor** | **-60%** | **3.94** | **-48%** | **4.98** |
 
-note: this is the scenario where mormor's "default to brief" rule costs the most quality. On Sonnet the model trades completeness for compression — skipping status codes or full GET-response shapes that the rubric checks for (mean 3.94/5). On Opus the dip is shallower (4.62/5) with a strong cost win at -57%. See [Tradeoff notes](#tradeoff-notes) below.
+note: this is the scenario where mormor's "default to brief" rule costs the most quality — but only on Sonnet now. On Sonnet the model trades completeness for compression, skipping status codes or full GET-response shapes that the rubric checks for (mean 3.94/5). On Opus 4.8 the dip is gone (4.98/5, up from 4.62 on the earlier Opus 4.7) while still winning -48% on cost. See [Tradeoff notes](#tradeoff-notes) below.
 
 ## Responses (Sonnet samples — median quality picks)
 
@@ -139,6 +139,6 @@ Mormor on Sonnet compresses harder than terse (~60% billed reduction vs terse's 
 
 These are details the rubric checks for that the user didn't explicitly request — Mormor's "default to brief" rule causes the model to drop them.
 
-On Opus the dip is shallower (4.62/5 vs Sonnet's 3.94/5) and the cost win is solid at -57% billed. The larger model preserves more of the optional details under the same protocol — but not all.
+On Opus 4.8 the dip disappears (4.98/5) and the cost win is solid at -48% billed — the newer model keeps the optional details under the same protocol. The earlier Opus 4.7 run dipped to 4.62/5 here (see [Earlier results](../README.md#earlier-results-superseded-model-versions)); Sonnet remains the one place this scenario trades quality for compression.
 
 **Adapting for completeness-critical tasks:** if you need every detail in the response, explicitly request them in the prompt ("…include status codes and request/response JSON shapes"). Mormor's compression is honest about what gets dropped — adding the missing details to the prompt closes the gap.

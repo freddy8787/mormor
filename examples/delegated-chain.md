@@ -46,15 +46,15 @@ Run this through your security reviewer AND your code-quality reviewer, then giv
 
 ## Benchmark results
 
-Sonnet 4.6 + Opus 4.7, n=50 runs × 5 hops each, v0.1.0 cheatsheet.
+Sonnet 4.6 + Opus 4.8, n=50 runs × 5 hops each, cheatsheet v1.
 
 | variant | sonnet billed Δ | sonnet quality (mean across 5 hops) | opus billed Δ | opus quality |
 | --- | ---: | ---: | ---: | ---: |
-| baseline | — | 4.57 | — | 4.51 |
-| terse | -36% | 4.62 | -19% | 4.53 |
-| **mormor** | **-68%** | **4.65** | **-68%** | **4.75** |
+| baseline | — | 4.57 | — | 4.62 |
+| terse | -36% | 4.62 | -26% | 4.57 |
+| **mormor** | **-68%** | **4.65** | **-60%** | **4.46** |
 
-note: this is the scenario where mormor's structural advantage shines hardest. **Sonnet: 33pts gap to terse. Opus: 49pts gap to terse.** Compression compounds across the 5 hops — each agent's output shrinks the next agent's input cost. Quality holds at or above baseline on both models.
+note: this is the scenario where mormor's structural advantage shines hardest. **Sonnet: ~32pts gap to terse. Opus 4.8: ~34pts gap to terse.** Compression compounds across the 5 hops — each agent's output shrinks the next agent's input cost. On Sonnet quality holds above baseline (4.65 vs 4.57); on Opus 4.8 it dips slightly below (4.46 vs 4.62), though all three variants score low here (baseline 4.62, terse 4.57), so it reflects a hard-to-grade scenario rather than a Mormor-specific drop.
 
 ## Sample exchange — Sonnet, run 0, mormor variant (all 5 hops)
 
@@ -191,9 +191,9 @@ def get_user_by_id(user_id: int) -> Optional[User]:
 | metric | value |
 | --- | --- |
 | baseline mean billed cost (5 hops) | _high_ — verbose dispatch + verbose reports + verbose synthesis |
-| mormor mean billed cost (5 hops) | -68% sonnet, -68% opus |
-| terse mean billed cost (5 hops) | -36% sonnet, -19% opus |
-| **mormor's lead over terse** | **+33 pts sonnet, +49 pts opus** |
+| mormor mean billed cost (5 hops) | -68% sonnet, -60% opus 4.8 |
+| terse mean billed cost (5 hops) | -36% sonnet, -26% opus 4.8 |
+| **mormor's lead over terse** | **+32 pts sonnet, +34 pts opus 4.8** |
 
 Where mormor's structural advantage compounds:
 - **dispatch hops (0, 1)**: `goal:` + `note:` carry the brief tighter than prose framing

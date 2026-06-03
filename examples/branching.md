@@ -23,15 +23,15 @@ def process_user(user_id):
 
 ## Benchmark results
 
-Sonnet 4.6 + Opus 4.7, n=50 runs each, v0.1.0 cheatsheet.
+Sonnet 4.6 + Opus 4.8, n=50 runs each, cheatsheet v1.
 
 | variant | sonnet billed Δ | sonnet quality | opus billed Δ | opus quality |
 | --- | ---: | ---: | ---: | ---: |
 | baseline (verbose prose) | — | 5.00 | — | 5.00 |
-| terse (concise prose) | -30% | 5.00 | -47% | 5.00 |
-| **mormor** | **-56%** | **4.98** | **-65%** | **4.76** |
+| terse (concise prose) | -30% | 5.00 | -49% | 5.00 |
+| **mormor** | **-56%** | **4.98** | **-57%** | **4.86** |
 
-note: same pattern on both models, different tradeoffs — Sonnet compresses ~26pts beyond terse with essentially no quality dip (4.98); Opus compresses ~18pts beyond terse with a mild quality dip (4.76/5). The `### case:` table format makes mormor's compression structural rather than just "fewer words".
+note: same pattern on both models, different tradeoffs — Sonnet compresses ~27pts beyond terse with essentially no quality dip (4.98); on Opus 4.8 terse already compresses hard here (-49%), so mormor's extra ~8pts (-57%) comes with a slight quality dip (4.86/5, up from 4.76 on the earlier Opus 4.7). The `### case:` table format makes mormor's compression structural rather than just "fewer words".
 
 ## Responses (Sonnet samples)
 
