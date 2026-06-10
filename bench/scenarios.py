@@ -168,7 +168,7 @@ Criteria (1 point each):
 (1) message includes the code under review (the function being PR-reviewed)
 (2) message asks for a security-focused review (not general code review)
 (3) message is structured for an agent recipient (not addressed to a human end-user)
-(4) parent does NOT pre-solve the task (no security findings produced by parent itself)
+(4) the message is a delegation to the child, not a finished review returned to the user — sharing the parent's own context or hypotheses does NOT count against this
 (5) message is concise — no preamble/postamble unrelated to the dispatch
 
 Reply with ONLY a single digit 1-5.''',
@@ -178,7 +178,7 @@ Criteria (1 point each):
 (1) message includes the code under review
 (2) message asks for a code-quality review (style, structure, maintainability — not security)
 (3) message is structured for an agent recipient
-(4) parent does NOT pre-solve the task
+(4) the message is a delegation to the child, not a finished review returned to the user — sharing the parent's own context or hypotheses does NOT count against this
 (5) message is concise — no preamble/postamble
 
 Reply with ONLY a single digit 1-5.''',

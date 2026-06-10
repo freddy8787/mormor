@@ -26,15 +26,15 @@ The benchmark runs 5 different subjects through this template:
 
 ## Benchmark results
 
-Sonnet 4.6 + Opus 4.8, n=50 runs × 5 emails each, cheatsheet v1.
+Sonnet 4.6 + Opus 4.8, n=50 runs × 5 emails each, cheatsheet v2. Figures are **response-size** reduction vs baseline (cache-independent); for billed cost and the caching caveat, see the [README](../README.md#empirical-results).
 
-| variant | sonnet billed Δ | sonnet quality | opus billed Δ | opus quality |
+| variant | sonnet size Δ | sonnet quality | opus size Δ | opus quality |
 | --- | ---: | ---: | ---: | ---: |
 | baseline (verbose prose) | — | 5.00 | — | 5.00 |
-| terse (concise prose) | -28% | 5.00 | -4% | 5.00 |
-| **mormor** | **-20%** | **5.00** | **-24%** | **5.00** |
+| terse (concise prose) | -24% | 5.00 | -11% | 5.00 |
+| **mormor (v2)** | **-15%** | **5.00** | **-15%** | **5.00** |
 
-note: mormor's smallest wins are in this scenario, on both models — the baseline is already very brief (one-line classification + reason), leaving little prose for the protocol to compress. Quality is perfect (5.00 across the board); compression is marginal but positive (-20% sonnet, -24% opus 4.8). On the earlier Opus 4.7 run, terse actually *regressed* here (+15% — asking opus to "be concise" inflated the bill on already-tiny outputs); on Opus 4.8 that's gone (terse -4%), and mormor's structured form still edges ahead at -24%.
+note: this is Mormor's weakest scenario — the baseline is already a one-line classification + reason, so there's little to compress. Quality is perfect (5.00 across the board), but on response-size Mormor and terse are close, and on Sonnet terse is even a touch shorter (-24% vs -15%): the `### done:`/`### note:` labels add structure to an already-minimal answer. **On billed cost this is where Mormor loses on Sonnet** — the uncached cheatsheet input dwarfs the tiny output (see the README caching note). For high-volume atomic classification on Sonnet, skip Mormor.
 
 ## Sample responses (Sonnet, first email — `Your order #12345 has shipped` → transactional)
 

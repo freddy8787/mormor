@@ -16,15 +16,15 @@ endpoints.
 
 ## Benchmark results
 
-Sonnet 4.6 + Opus 4.8, n=50 runs each, cheatsheet v1.
+Sonnet 4.6 + Opus 4.8, n=50 runs each, cheatsheet v2. Figures are **response-size** reduction vs baseline (cache-independent); for billed cost and the caching caveat, see the [README](../README.md#empirical-results).
 
-| variant | sonnet billed Δ | sonnet quality | opus billed Δ | opus quality |
+| variant | sonnet size Δ | sonnet quality | opus size Δ | opus quality |
 | --- | ---: | ---: | ---: | ---: |
-| baseline (verbose prose) | — | 4.94 | — | 4.98 |
-| terse (concise prose) | -30% | 4.94 | -31% | 4.92 |
-| **mormor** | **-60%** | **3.94** | **-48%** | **4.98** |
+| baseline (verbose prose) | — | 4.88 | — | 4.94 |
+| terse (concise prose) | -40% | 4.80 | -31% | 4.92 |
+| **mormor (v2)** | **-75%** | **3.14** | **-60%** | **4.88** |
 
-note: this is the scenario where mormor's "default to brief" rule costs the most quality — but only on Sonnet now. On Sonnet the model trades completeness for compression, skipping status codes or full GET-response shapes that the rubric checks for (mean 3.94/5). On Opus 4.8 the dip is gone (4.98/5, up from 4.62 on the earlier Opus 4.7) while still winning -48% on cost. See [Tradeoff notes](#tradeoff-notes) below.
+note: this is the scenario where mormor's compress-by-default rule costs the most quality, on Sonnet — the model trades completeness for compression, skipping status codes or full GET-response shapes that the rubric checks for (mean 3.14/5) while shrinking the response ~75%. On Opus the dip is mild (4.88/5) and responses are still ~60% shorter. It's the one place Mormor clearly trades quality for compression; see [Tradeoff notes](#tradeoff-notes) below.
 
 ## Responses (Sonnet samples — median quality picks)
 
@@ -133,12 +133,12 @@ REST API endpoint map
 
 ## Tradeoff notes
 
-Mormor on Sonnet compresses harder than terse (~60% billed reduction vs terse's ~30%) but scores lower on the rubric (3.94 vs 4.94). The lower-scoring runs typically skip:
+Mormor on Sonnet compresses harder than terse (~75% shorter responses vs terse's ~40%) but scores lower on the rubric (3.14 vs 4.80). The lower-scoring runs typically skip:
 - explicit status codes for each endpoint (not all 5 codes mentioned)
 - the GET-response JSON shape (model lists "list all todos" but doesn't show the response object structure)
 
 These are details the rubric checks for that the user didn't explicitly request — Mormor's "default to brief" rule causes the model to drop them.
 
-On Opus 4.8 the dip disappears (4.98/5) and the cost win is solid at -48% billed — the newer model keeps the optional details under the same protocol. The earlier Opus 4.7 run dipped to 4.62/5 here (see [Earlier results](../README.md#earlier-results-superseded-model-versions)); Sonnet remains the one place this scenario trades quality for compression.
+On Opus the dip is mild (4.88/5 vs baseline 4.94) and responses are still ~60% shorter — the bigger model keeps most optional details under the same protocol. Sonnet remains the one place this scenario clearly trades quality for compression.
 
 **Adapting for completeness-critical tasks:** if you need every detail in the response, explicitly request them in the prompt ("…include status codes and request/response JSON shapes"). Mormor's compression is honest about what gets dropped — adding the missing details to the prompt closes the gap.

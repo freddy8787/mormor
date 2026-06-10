@@ -5,6 +5,15 @@ Mormor uses two independent version axes:
 - **Cheatsheet version** (`v1`, `v2`, …) — the protocol artifact itself; bumps when the cheatsheet body changes. Every version is frozen in [`cheatsheets/`](./cheatsheets/); `cheatsheets/DEFAULT` names the recommended pick.
 - **Repo / release version** — [SemVer](https://semver.org/), the entries below. A cheatsheet change is a **minor** bump; benchmark re-runs, docs, and tooling are **patch** bumps with the cheatsheet unchanged. 0.x is experimental.
 
+## [0.2.0] — 2026-06-10
+
+Cheatsheet **v1 → v2** — `cheatsheets/DEFAULT` now points to [`v2`](./cheatsheets/v2.md); v1 stays frozen.
+
+- **v2 cheatsheet:** dedup of v1 plus a classification cue, an `AskUserQuestion` rule, and a fragment-style compression rule. Smaller and cleaner than v1.
+- **Re-validated at n=50 (Opus 4.8 / Sonnet 4.6).** vs v1: ~8–10% shorter responses, quality held, format compliance 1.000. Billed Δ vs baseline: Opus −52%, Sonnet −54%.
+- **Caching finding:** the cheatsheet only caches above Anthropic's [1,024-token minimum](https://platform.claude.com/docs/en/build-with-claude/prompt-caching) — clears it on Opus but not Sonnet single-message calls (resolves the old "cache anomaly"; the Sonnet billed figure is conservative). See README → Empirical results.
+- **Benchmark:** rubric v2 — `delegated_chain` dispatch hops no longer penalize a parent for sharing context with the child.
+
 ## [0.1.1] — 2026-05-29
 
 Maintenance — **cheatsheet unchanged (still v1)**.

@@ -23,15 +23,15 @@ def process_user(user_id):
 
 ## Benchmark results
 
-Sonnet 4.6 + Opus 4.8, n=50 runs each, cheatsheet v1.
+Sonnet 4.6 + Opus 4.8, n=50 runs each, cheatsheet v2. Figures are **response-size** reduction vs baseline (cache-independent); for billed cost and the caching caveat, see the [README](../README.md#empirical-results).
 
-| variant | sonnet billed Δ | sonnet quality | opus billed Δ | opus quality |
+| variant | sonnet size Δ | sonnet quality | opus size Δ | opus quality |
 | --- | ---: | ---: | ---: | ---: |
 | baseline (verbose prose) | — | 5.00 | — | 5.00 |
-| terse (concise prose) | -30% | 5.00 | -49% | 5.00 |
-| **mormor** | **-56%** | **4.98** | **-57%** | **4.86** |
+| terse (concise prose) | -44% | 5.00 | -47% | 5.00 |
+| **mormor (v2)** | **-56%** | **4.98** | **-68%** | **4.80** |
 
-note: same pattern on both models, different tradeoffs — Sonnet compresses ~27pts beyond terse with essentially no quality dip (4.98); on Opus 4.8 terse already compresses hard here (-49%), so mormor's extra ~8pts (-57%) comes with a slight quality dip (4.86/5, up from 4.76 on the earlier Opus 4.7). The `### case:` table format makes mormor's compression structural rather than just "fewer words".
+note: the `### case:` table makes mormor's compression structural rather than just "fewer words". Sonnet: ~12pts shorter than terse with essentially no quality dip (4.98). On Opus mormor compresses hardest here (-68%, ~21pts beyond terse), which comes with a small quality dip (4.80/5 — occasionally a secondary finding gets dropped).
 
 ## Responses (Sonnet samples)
 
