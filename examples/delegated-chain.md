@@ -46,15 +46,15 @@ Run this through your security reviewer AND your code-quality reviewer, then giv
 
 ## Benchmark results
 
-Sonnet 4.6 + Opus 4.8, n=50 runs × 5 hops each, cheatsheet v2. Figures are **response-size** reduction vs baseline (cache-independent); for billed cost and the caching caveat, see the [README](../README.md#empirical-results).
+Sonnet 4.6 + Opus 4.8, n=50 runs × 5 hops each, cheatsheet v3. Figures are **response-size** reduction vs baseline (cache-independent); for billed cost and the caching caveat, see the [README](../README.md#empirical-results).
 
 | variant | sonnet size Δ | sonnet quality (mean across 5 hops) | opus size Δ | opus quality |
 | --- | ---: | ---: | ---: | ---: |
-| baseline | — | 4.86 | — | 4.92 |
-| terse | -59% | 4.93 | -26% | 4.94 |
-| **mormor (v2)** | **-79%** | **4.91** | **-68%** | **4.88** |
+| baseline | — | 4.94 | — | 4.96 |
+| terse | -57% | 4.92 | -28% | 4.89 |
+| **mormor (v3)** | **-75%** | **4.92** | **-66%** | **4.83** |
 
-note: this is where mormor's structural advantage shines hardest — compression compounds across the 5 hops, each agent's output shrinking the next agent's input. **Sonnet: ~20pts shorter than terse. Opus: ~42pts.** Quality holds near baseline on both (Sonnet 4.91 vs 4.86; Opus 4.88 vs 4.92), graded under rubric v2 (which no longer penalizes a parent for sharing context with the child — that scored an orchestration choice, not Mormor).
+note: this is where mormor's structural advantage shines hardest — compression compounds across the 5 hops, each agent's output shrinking the next agent's input. **Sonnet: ~18pts shorter than terse. Opus: ~38pts.** Quality holds near baseline on both (Sonnet 4.92 vs 4.94; Opus 4.83 vs 4.96).
 
 ## Sample exchange — Sonnet, run 0, mormor variant (all 5 hops)
 
@@ -191,9 +191,9 @@ def get_user_by_id(user_id: int) -> Optional[User]:
 | metric | value |
 | --- | --- |
 | baseline response size (5 hops) | _high_ — verbose dispatch + verbose reports + verbose synthesis |
-| mormor response-size reduction (5 hops) | -79% sonnet, -68% opus |
-| terse response-size reduction (5 hops) | -59% sonnet, -26% opus |
-| **mormor's lead over terse** | **+20 pts sonnet, +42 pts opus** |
+| mormor response-size reduction (5 hops) | -75% sonnet, -66% opus |
+| terse response-size reduction (5 hops) | -57% sonnet, -28% opus |
+| **mormor's lead over terse** | **+18 pts sonnet, +38 pts opus** |
 
 Where mormor's structural advantage compounds:
 - **dispatch hops (0, 1)**: `goal:` + `note:` carry the brief tighter than prose framing

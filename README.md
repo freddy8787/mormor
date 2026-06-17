@@ -10,13 +10,13 @@ This is what I measured:
 
 | variant | sonnet 4.6 billed Δ | sonnet 4.6 quality | opus 4.8 billed Δ | opus 4.8 quality |
 | --- | ---: | ---: | ---: | ---: |
-| baseline (verbose prose) | — | 4.93 | — | 4.97 |
-| terse (concise prose) | -45% | 4.94 | -25% | 4.97 |
-| **mormor (v2)** | **-54%** | **4.83** | **-52%** | **4.94** |
+| baseline (verbose prose) | — | 4.93 | — | 4.95 |
+| terse (concise prose) | -44% | 4.90 | -24% | 4.94 |
+| **mormor (v3)** | **-64%** | **4.90** | **-53%** | **4.86** |
 
-Mormor saves the most on billed cost while holding quality within ~0.1 of baseline on both models. Answers also come back faster — **about 56% quicker on Sonnet, ~32% on Opus 4.8** — because there is less to write. The one clear quality trade is Sonnet's `single_round_trip` (3.14/5), where the compress-by-default rule gives up optional details on a task whose rubric quietly wants every one (see [Empirical results](#empirical-results)).
+Mormor saves the most on billed cost while holding quality within ~0.1 of baseline on both models. Answers also come back faster — **about 52% quicker on Sonnet, ~26% on Opus 4.8** — because there is less to write.
 
-The Sonnet billed figure is conservative: there the cheatsheet falls just under Anthropic's 1,024-token cache minimum so it isn't cached, and the −54% already absorbs that cost each call (on Opus it caches). The billed win is largest on Opus; see [Empirical results](#empirical-results).
+The cheatsheet caches on both models — it clears Anthropic's 1,024-token cache minimum, so the prefix bills at the cached rate — and every scenario is a billed win on Sonnet and Opus alike, including high-frequency one-line classification. See [Empirical results](#empirical-results).
 
 ### How Mormor works
 
@@ -74,13 +74,13 @@ Both cases are agent-to-agent, which is where Mormor saves the most (see the per
 
 **Pre-1.0.** Try it on an experimental project first to build confidence, and feel free to adapt the cheatsheet per-project if defaults don't fit your workflow. See [`CHANGELOG.md`](./CHANGELOG.md) for the current version.
 
-**Tested models.** Mormor's headline numbers are from Sonnet 4.6 and Opus 4.8 (the latest tested version of each). Earlier Opus 4.7 results are retained under [Earlier results](#earlier-results-superseded-model-versions). Haiku 4.5 was also tested but consistently lost on billed cost — the uncached cheatsheet input (see the [caching note](#empirical-results) below) outweighed the response-size savings on the smaller model.
+**Tested models.** Mormor's headline numbers are from Sonnet 4.6 and Opus 4.8 (the latest tested version of each). Earlier Opus 4.7 results are retained under [Earlier results](#earlier-results-superseded-model-versions). Haiku 4.5 was tested early on but consistently lost on billed cost on the smaller model, so it's not part of the tested set going forward.
 
 ---
 
 ## Getting started
 
-There is nothing to install — Mormor is a vocabulary, not software. Open the current cheatsheet — [`cheatsheets/v2.md`](./cheatsheets/v2.md) (the recommended version; see [`cheatsheets/`](./cheatsheets/)) — paste it into your system prompt (or append it to `CLAUDE.md`), and use the labels in your messages. For a single agent that is the whole setup. Subagents need an extra step — see [Agent-to-agent setup](#agent-to-agent-setup).
+There is nothing to install — Mormor is a vocabulary, not software. Open the current cheatsheet — [`cheatsheets/v3.md`](./cheatsheets/v3.md) (the recommended version; see [`cheatsheets/`](./cheatsheets/)) — paste it into your system prompt (or append it to `CLAUDE.md`), and use the labels in your messages. For a single agent that is the whole setup. Subagents need an extra step — see [Agent-to-agent setup](#agent-to-agent-setup).
 
 ---
 
@@ -90,7 +90,7 @@ Agents that talk to other agents (and to users in scripted work) write a lot of 
 
 My idea is simple: a small set of labels lets the model drop the filler without losing meaning. The labels carry what the prose used to say between the lines ("here is the result", "here is some context", "here is a condition").
 
-The simplest alternative is just asking the model to be concise. In my benchmark that saves 25% (Opus) to 45% (Sonnet) on billed cost — useful on its own — but it stops there, because the savings come from fewer hedges, not from shorter structure. Mormor compresses further still (Opus −52%, Sonnet −54%) at near-equal quality, and the biggest gaps are in agent-to-agent cases, where the labeled output is easy for the next agent to read.
+The simplest alternative is just asking the model to be concise. In my benchmark that saves 24% (Opus) to 44% (Sonnet) on billed cost — useful on its own — but it stops there, because the savings come from fewer hedges, not from shorter structure. Mormor compresses further still (Opus −53%, Sonnet −64%) at near-equal quality, and the biggest gaps are in agent-to-agent cases, where the labeled output is easy for the next agent to read.
 
 ---
 
@@ -102,30 +102,30 @@ The headline table at the top is the aggregate of 5 scenarios × 3 variants × 2
 
 **Cost is all-in.** The `billed` numbers above are computed on the SDK's `output_tokens`, which includes any extended-thinking tokens the model generated before the visible response — not just displayed text. Mormor's compression edge therefore reflects real wallet impact with no hidden-thinking blind spot. Runs use the SDK's `effort='low'` setting to dampen extended thinking; results at higher effort levels may differ.
 
-**Caching note.** Billed savings assume the cheatsheet caches (cached input bills at 0.10×), which needs the prompt prefix to clear Anthropic's [1,024-token minimum](https://platform.claude.com/docs/en/build-with-claude/prompt-caching). It clears on Opus; on Sonnet single-message calls it falls just under, so there the cheatsheet isn't cached and the Sonnet billed figures already absorb that full uncached cost (they're conservative). The cache-independent metrics — response-size ratio, latency, quality, compliance — are unaffected.
+**Caching note.** Billed savings assume the cheatsheet caches (cached input bills at 0.10×), which needs the prompt prefix to clear Anthropic's [1,024-token minimum](https://platform.claude.com/docs/en/build-with-claude/prompt-caching). The cheatsheet clears it on both Opus and Sonnet, so it caches on both. The cache-independent metrics — response-size ratio, latency, quality, compliance — are unaffected.
 
-### Per-scenario billed-cost reduction (mormor v2 vs baseline)
+### Per-scenario billed-cost reduction (mormor v3 vs baseline)
 
 | scenario | sonnet 4.6 | opus 4.8 |
 | --- | ---: | ---: |
-| `single_round_trip` (planning task) | -56% | -56% |
-| `branching` (security review) | -29% | **-63%** |
-| `multi_turn` (5-turn debugging) | -61% | -47% |
-| `high_frequency` (classification) | **+236%** | -14% |
-| `delegated_chain` (5-hop fan-out) | **-66%** | -51% |
+| `single_round_trip` (planning task) | **-66%** | -55% |
+| `branching` (security review) | -64% | -51% |
+| `multi_turn` (5-turn debugging) | -55% | -49% |
+| `high_frequency` (classification) | -34% | -35% |
+| `delegated_chain` (5-hop fan-out) | **-71%** | **-58%** |
 
-The Sonnet single-call rows (`single_round_trip`, `branching`, `high_frequency`) carry the full *uncached* cheatsheet cost (see the caching note above). That's why `high_frequency` — one-line classifications whose tiny output can't offset ~900 fresh cheatsheet tokens — goes net-**positive** on Sonnet: Mormor is the wrong tool for high-volume atomic classification on an uncached cheatsheet. On Opus, where the cheatsheet caches, every scenario stays strongly negative; and `multi_turn`/`delegated_chain` win on both models (they cache and/or produce enough output to dominate the prefix cost). The cache-independent **response-size ratio** tells the cleaner compression story: v2 responses are 0.40× baseline on Opus and 0.29× on Sonnet.
+Every scenario is a billed win on both models. The strongest are the agent-to-agent (`delegated_chain`) and multi-turn scenarios, where compression compounds across turns/hops; `high_frequency` is the smallest, since a one-line answer leaves little to compress. The cache-independent **response-size ratio** tells the cleaner compression story: responses are 0.33× baseline on Opus and 0.29× on Sonnet.
 
 ### Where Mormor shines
 
-- **Agent-to-agent chains** — `delegated_chain` is among Mormor's strongest scenarios on both models (-66% sonnet / -51% opus 4.8 billed). Compression compounds across hops; mormor's labeled outputs flow cleanly into downstream agents' inputs.
-- **Code review and decision tables** — `case:` directly satisfies a severity→action classification framework; baseline+terse use prose headings + bold which compress less. `branching` posts -63% on Opus with quality near 5.00.
-- **Multi-turn work** — `multi_turn` wins on both (-61% sonnet / -47% opus), and on Sonnet its accumulated context clears the cache minimum, so the cheatsheet caches there too.
+- **Agent-to-agent chains** — `delegated_chain` is Mormor's strongest scenario on both models (-71% sonnet / -58% opus billed). Compression compounds across hops; mormor's labeled outputs flow cleanly into downstream agents' inputs.
+- **Code review and decision tables** — `case:` directly satisfies a severity→action classification framework; baseline+terse use prose headings + bold which compress less. `branching` posts -64% sonnet / -51% opus with quality near 5.00.
+- **Multi-turn work** — `multi_turn` wins on both (-55% sonnet / -49% opus).
 
 ### Where Mormor's compression doesn't pay as hard
 
-- **High-frequency atomic classification** — `high_frequency` is the weak spot: -14% on Opus, and net-**positive** on Sonnet, where a one-line answer can't offset the uncached ~900-token cheatsheet (see the caching note). For high-volume atomic classification, especially on Sonnet, skip Mormor.
-- **Quality dip on `single_round_trip` (Sonnet 3.14/5)** — when the rubric implicitly checks for optional details (status codes, every endpoint), Mormor's compress-by-default rule causes the model to skip them. It's a Sonnet effect; Opus holds (4.88/5). v1 dips here too (Sonnet 3.44), and v2's extra compression makes it marginally worse — that single scenario is the main reason v2's aggregate Sonnet quality (4.83) sits just under v1's (4.85). Every other scenario × model cell holds within ~0.15 of baseline. This is the one place Mormor trades quality for compression; if your Sonnet workload is heavy on detail-complete single-shot specs, weigh v1 or a per-task override.
+- **High-frequency atomic classification** — `high_frequency` is a billed win on both models (-34% sonnet / -35% opus), but it's Mormor's *smallest* win: a one-line answer leaves almost nothing to compress, so the saving comes mostly from caching, not from a shorter response. Fine to use — the payoff is just modest.
+- **Opus `multi_turn` quality** — the one cell where Mormor softens slightly: Opus mormor quality on `multi_turn` is 4.72 (format compliance 94%, vs 100% everywhere else), pulling Opus's aggregate mormor quality to 4.86 — still within ~0.1 of baseline (4.95). Sonnet `multi_turn` is unaffected (100% compliance).
 
 Per-scenario breakdowns, full methodology, and reproduction steps: [`bench/README.md`](./bench/README.md). Per-scenario sample exchanges live in [`examples/`](./examples/).
 
@@ -166,7 +166,7 @@ For larger fleets (optional): only inject the cheatsheet into agents you own (do
 ```
 mormor/
 ├── README.md          # this file — overview, empirical results, agent-to-agent setup
-├── cheatsheets/       # the protocol — frozen versions (v1, v2); paste the recommended one (v2)
+├── cheatsheets/       # the protocol — frozen versions; paste the recommended one (see DEFAULT)
 ├── CHANGELOG.md       # version history
 ├── assets/            # screenshots used in this README
 ├── examples/          # short Mormor exchanges by use case

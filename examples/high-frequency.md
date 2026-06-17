@@ -26,15 +26,15 @@ The benchmark runs 5 different subjects through this template:
 
 ## Benchmark results
 
-Sonnet 4.6 + Opus 4.8, n=50 runs × 5 emails each, cheatsheet v2. Figures are **response-size** reduction vs baseline (cache-independent); for billed cost and the caching caveat, see the [README](../README.md#empirical-results).
+Sonnet 4.6 + Opus 4.8, n=50 runs × 5 emails each, cheatsheet v3. Figures are **response-size** reduction vs baseline (cache-independent); for billed cost and the caching caveat, see the [README](../README.md#empirical-results).
 
 | variant | sonnet size Δ | sonnet quality | opus size Δ | opus quality |
 | --- | ---: | ---: | ---: | ---: |
 | baseline (verbose prose) | — | 5.00 | — | 5.00 |
-| terse (concise prose) | -24% | 5.00 | -11% | 5.00 |
-| **mormor (v2)** | **-15%** | **5.00** | **-15%** | **5.00** |
+| terse (concise prose) | -14% | 5.00 | -12% | 5.00 |
+| **mormor (v3)** | **+14%** | **5.00** | **0%** | **5.00** |
 
-note: this is Mormor's weakest scenario — the baseline is already a one-line classification + reason, so there's little to compress. Quality is perfect (5.00 across the board), but on response-size Mormor and terse are close, and on Sonnet terse is even a touch shorter (-24% vs -15%): the `### done:`/`### note:` labels add structure to an already-minimal answer. **On billed cost this is where Mormor loses on Sonnet** — the uncached cheatsheet input dwarfs the tiny output (see the README caching note). For high-volume atomic classification on Sonnet, skip Mormor.
+note: this is Mormor's weakest scenario on response-size — the baseline is already a one-line classification + reason, so there's nothing to compress; the `### done:`/`### note:` labels add a little structure, leaving mormor about the same size as baseline (a touch larger on Sonnet). Quality is perfect (5.00 across the board). On **billed** cost it's still a win on both models — the cheatsheet caches, so the cached prefix costs little — but it's Mormor's smallest win: with a one-line answer the saving comes from caching, not from a shorter response.
 
 ## Sample responses (Sonnet, first email — `Your order #12345 has shipped` → transactional)
 
@@ -68,8 +68,8 @@ order status notification triggered by a specific user action (purchase)
 ```
 (~28 vis_out tokens)
 
-note: visible output is similar between terse and mormor on this scenario (~25 tokens). The shape differs (mormor uses h3 labels, terse uses bold + dash), but no big compression gap on output. The billed savings come from quality + structural consistency rather than dramatic byte reduction.
+note: visible output is similar across terse and mormor here (~20–25 tokens) — the shape differs (mormor uses h3 labels, terse uses bold + dash), but there's no big byte gap on an already-tiny answer. The billed win comes from the cached cheatsheet prefix and structural consistency, not from dramatic byte reduction.
 
 ## Atomic-output note
 
-Cheatsheet v1 reserves atomic-output (bare value, no labels) for **just numbers, yes/no, or status codes with no context** — like `42` or `yes`. A category name like `transactional` is "nameable", which counts as multi-part per the cheatsheet, so it goes under `### done:`. Even when the prompt asks for only the category with no reason, the labeled form is the protocol-compliant shape.
+The cheatsheet reserves atomic-output (bare value, no labels) for **just numbers, yes/no, or status codes with no context** — like `42` or `yes`. A category name like `transactional` is "nameable", which counts as multi-part, so it goes under `### done:` (with the reason in `### note:`) — never a bare `transactional → reason` line. Even when the prompt asks for only the category with no reason, the labeled form is the protocol-compliant shape.

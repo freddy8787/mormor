@@ -16,15 +16,15 @@ endpoints.
 
 ## Benchmark results
 
-Sonnet 4.6 + Opus 4.8, n=50 runs each, cheatsheet v2. Figures are **response-size** reduction vs baseline (cache-independent); for billed cost and the caching caveat, see the [README](../README.md#empirical-results).
+Sonnet 4.6 + Opus 4.8, n=50 runs each, cheatsheet v3. Figures are **response-size** reduction vs baseline (cache-independent); for billed cost and the caching caveat, see the [README](../README.md#empirical-results).
 
 | variant | sonnet size Δ | sonnet quality | opus size Δ | opus quality |
 | --- | ---: | ---: | ---: | ---: |
-| baseline (verbose prose) | — | 4.88 | — | 4.94 |
-| terse (concise prose) | -40% | 4.80 | -31% | 4.92 |
-| **mormor (v2)** | **-75%** | **3.14** | **-60%** | **4.88** |
+| baseline (verbose prose) | — | 4.96 | — | 4.96 |
+| terse (concise prose) | -45% | 4.74 | -30% | 4.90 |
+| **mormor (v3)** | **-64%** | **4.96** | **-50%** | **4.96** |
 
-note: this is the scenario where mormor's compress-by-default rule costs the most quality, on Sonnet — the model trades completeness for compression, skipping status codes or full GET-response shapes that the rubric checks for (mean 3.14/5) while shrinking the response ~75%. On Opus the dip is mild (4.88/5) and responses are still ~60% shorter. It's the one place Mormor clearly trades quality for compression; see [Tradeoff notes](#tradeoff-notes) below.
+note: a planning task — the agent maps endpoints, methods, status codes, and response shapes. Mormor's completeness guard (*compress wording, never coverage*) keeps every enumerated item the task implies, so quality holds at baseline (4.96 on both models) while responses run -64% shorter on Sonnet and -50% on Opus; see [Notes](#notes) below.
 
 ## Responses (Sonnet samples — median quality picks)
 
@@ -109,7 +109,7 @@ Here's a clean, minimal REST API design for your todo list app:
 | `order` | `asc`/`desc` | Sort direction |
 ````
 
-### mormor (q=4, ~210 tokens)
+### mormor (q=5, ~210 tokens)
 
 ```
 ### done:
@@ -131,14 +131,8 @@ REST API endpoint map
 - filtering (e.g. `GET /todos?done=false`) can be added as query param later without breaking contract
 ```
 
-## Tradeoff notes
+## Notes
 
-Mormor on Sonnet compresses harder than terse (~75% shorter responses vs terse's ~40%) but scores lower on the rubric (3.14 vs 4.80). The lower-scoring runs typically skip:
-- explicit status codes for each endpoint (not all 5 codes mentioned)
-- the GET-response JSON shape (model lists "list all todos" but doesn't show the response object structure)
+Mormor compresses this scenario hard (-64% sonnet / -50% opus vs baseline) while holding quality at baseline (4.96 on both models). The completeness guard does the work: it drops filler wording but keeps every enumerated item the task implies — endpoints, methods, status codes, request/response shapes — so the shorter response stays complete. The sample above keeps all five endpoints plus the status-code line and body shapes under `### note:`.
 
-These are details the rubric checks for that the user didn't explicitly request — Mormor's "default to brief" rule causes the model to drop them.
-
-On Opus the dip is mild (4.88/5 vs baseline 4.94) and responses are still ~60% shorter — the bigger model keeps most optional details under the same protocol. Sonnet remains the one place this scenario clearly trades quality for compression.
-
-**Adapting for completeness-critical tasks:** if you need every detail in the response, explicitly request them in the prompt ("…include status codes and request/response JSON shapes"). Mormor's compression is honest about what gets dropped — adding the missing details to the prompt closes the gap.
+**Completeness-critical tasks:** if a task needs a detail that isn't obviously implied, ask for it explicitly in the prompt ("…include status codes and request/response JSON shapes"). Compression trims wording, not requested coverage.

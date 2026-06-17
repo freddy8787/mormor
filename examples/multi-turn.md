@@ -26,15 +26,15 @@ Turn 5: Going with transactions. Can you sketch the pytest fixture?
 
 ## Benchmark results
 
-Sonnet 4.6 + Opus 4.8, n=50 runs each, 5 turns per run, cheatsheet v2. Figures are **response-size** reduction vs baseline (cache-independent); for billed cost and the caching caveat, see the [README](../README.md#empirical-results).
+Sonnet 4.6 + Opus 4.8, n=50 runs each, 5 turns per run, cheatsheet v3. Figures are **response-size** reduction vs baseline (cache-independent); for billed cost and the caching caveat, see the [README](../README.md#empirical-results).
 
 | variant | sonnet size Δ | sonnet quality (mean) | opus size Δ | opus quality |
 | --- | ---: | ---: | ---: | ---: |
-| baseline | — | 4.94 | — | 4.98 |
-| terse | -43% | 4.90 | -19% | 4.98 |
-| **mormor (v2)** | **-67%** | **4.88** | **-50%** | **4.97** |
+| baseline | — | 4.84 | — | 4.88 |
+| terse | -36% | 4.80 | -20% | 4.91 |
+| **mormor (v3)** | **-55%** | **4.76** | **-51%** | **4.72** |
 
-note: mormor stays within ~0.06 of baseline quality on both models. The response-size gap to terse is ~24pts on Sonnet and ~31pts on Opus (terse compresses only -19% on Opus, so mormor's structured form pulls well ahead). Per-turn quality holds even on the densest turn — and on Sonnet this is the one single-agent scenario where accumulated context lets the cheatsheet cache.
+note: mormor compresses -55% on Sonnet / -51% on Opus, well beyond terse (-36% / -20%), so the structured form pulls clearly ahead. Quality stays close to baseline (Sonnet 4.76 vs 4.84; Opus 4.72 vs 4.88) — `multi_turn` is Mormor's softest quality cell, most so on Opus, where format compliance also dips slightly (94% vs 100% elsewhere).
 
 ## Sample exchange — Sonnet, run 0, mormor variant (full 5 turns)
 
@@ -199,4 +199,4 @@ def test_pipeline_assumes_empty_table(db):
 
 - mormor uses `### done:` to lead each turn (so the user can scan the headline answer first), then organizes details under `### case:` tables or labeled bullets
 - compression in multi-turn is dominated by conversation cache — by turn 5, the input has accumulated all 4 prior turns + responses; mormor's smaller responses keep the cache lean
-- per-turn mean quality 4.88 sonnet / 4.97 opus — within ~0.06 of baseline on both models even on the densest turn (turn 5 with the fixture sketch)
+- per-turn mean quality 4.76 sonnet / 4.72 opus — close to baseline (4.84 / 4.88), though `multi_turn` is Mormor's softest cell, most so on Opus (format compliance 94% vs 100% elsewhere)

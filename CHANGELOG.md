@@ -5,6 +5,14 @@ Mormor uses two independent version axes:
 - **Cheatsheet version** (`v1`, `v2`, …) — the protocol artifact itself; bumps when the cheatsheet body changes. Every version is frozen in [`cheatsheets/`](./cheatsheets/); `cheatsheets/DEFAULT` names the recommended pick.
 - **Repo / release version** — [SemVer](https://semver.org/), the entries below. A cheatsheet change is a **minor** bump; benchmark re-runs, docs, and tooling are **patch** bumps with the cheatsheet unchanged. 0.x is experimental.
 
+## [0.3.0] — 2026-06-17
+
+Cheatsheet **v2 → v3** — `cheatsheets/DEFAULT` now points to [`v3`](./cheatsheets/v3.md).
+
+- **v3 cheatsheet:** adds a completeness guard (compress wording, never coverage), a filler stop-list, a multi-turn compliance rule, and a sharpened atomic/multi-part rule with a classification example. Sized to clear Anthropic's 1,024-token cache minimum on Sonnet too.
+- **Now caches on Sonnet** as well as Opus (v1/v2 sat under the cache floor on Sonnet single-message calls), so every scenario is a billed win on both models — and v3 resolves v2's Sonnet `single_round_trip` quality dip.
+- Re-validated at n=50 (Opus 4.8 / Sonnet 4.6); numbers in [`README.md`](./README.md).
+
 ## [0.2.0] — 2026-06-10
 
 Cheatsheet **v1 → v2** — `cheatsheets/DEFAULT` now points to [`v2`](./cheatsheets/v2.md); v1 stays frozen.

@@ -23,15 +23,15 @@ def process_user(user_id):
 
 ## Benchmark results
 
-Sonnet 4.6 + Opus 4.8, n=50 runs each, cheatsheet v2. Figures are **response-size** reduction vs baseline (cache-independent); for billed cost and the caching caveat, see the [README](../README.md#empirical-results).
+Sonnet 4.6 + Opus 4.8, n=50 runs each, cheatsheet v3. Figures are **response-size** reduction vs baseline (cache-independent); for billed cost and the caching caveat, see the [README](../README.md#empirical-results).
 
 | variant | sonnet size Δ | sonnet quality | opus size Δ | opus quality |
 | --- | ---: | ---: | ---: | ---: |
 | baseline (verbose prose) | — | 5.00 | — | 5.00 |
-| terse (concise prose) | -44% | 5.00 | -47% | 5.00 |
-| **mormor (v2)** | **-56%** | **4.98** | **-68%** | **4.80** |
+| terse (concise prose) | -54% | 5.00 | -47% | 5.00 |
+| **mormor (v3)** | **-59%** | **4.84** | **-55%** | **4.94** |
 
-note: the `### case:` table makes mormor's compression structural rather than just "fewer words". Sonnet: ~12pts shorter than terse with essentially no quality dip (4.98). On Opus mormor compresses hardest here (-68%, ~21pts beyond terse), which comes with a small quality dip (4.80/5 — occasionally a secondary finding gets dropped).
+note: the `### case:` table makes mormor's compression structural rather than just "fewer words". mormor runs -59% on Sonnet / -55% on Opus, a few points beyond terse, with quality holding near baseline (Sonnet 4.84, Opus 4.94 — occasionally a secondary finding is phrased more tersely).
 
 ## Responses (Sonnet samples)
 
@@ -136,4 +136,4 @@ user = db.query("SELECT * FROM users WHERE id = %s", (user_id,))
 
 - Mormor's `case:` table directly satisfies the user's classification framework — every finding has a row with severity + action mapped 1:1
 - `case:` saves significant bytes here vs prose: the baseline uses headers (`### Must-Fix`, `### Should-Fix`, `### Nit`) + bold text + emoji severity markers; mormor collapses all of that into one structured table
-- Opus's quality dip is due to compression occasionally dropping a secondary security finding (e.g. the model lists 4 findings instead of 5+); Sonnet keeps all findings concise enough to score full
+- quality holds near baseline on both (Sonnet 4.84, Opus 4.94); the occasional point off comes from a secondary finding being phrased more tersely under the same `case:` table, not from dropping it
