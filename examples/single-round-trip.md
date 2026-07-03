@@ -16,15 +16,15 @@ endpoints.
 
 ## Benchmark results
 
-Sonnet 4.6 + Opus 4.8, n=50 runs each, cheatsheet v3. Figures are **response-size** reduction vs baseline (cache-independent); for billed cost and the caching caveat, see the [README](../README.md#empirical-results).
+Sonnet 5 + Opus 4.8 + Fable 5, n=50 runs each, cheatsheet v3. Figures are **response-size** reduction vs baseline (cache-independent); for billed cost and the caching caveat, see the [README](../README.md#empirical-results).
 
-| variant | sonnet size Δ | sonnet quality | opus size Δ | opus quality |
-| --- | ---: | ---: | ---: | ---: |
-| baseline (verbose prose) | — | 4.96 | — | 4.96 |
-| terse (concise prose) | -45% | 4.74 | -30% | 4.90 |
-| **mormor (v3)** | **-64%** | **4.96** | **-50%** | **4.96** |
+| variant | fable 5 size Δ | fable 5 quality | opus 4.8 size Δ | opus 4.8 quality | sonnet 5 size Δ | sonnet 5 quality |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| baseline (verbose prose) | — | 5.00 | — | 4.96 | — | 4.98 |
+| terse (concise prose) | -40% | 4.76 | -30% | 4.90 | -38% | 4.88 |
+| **mormor (v3)** | **-43%** | **4.94** | **-50%** | **4.96** | **-64%** | **4.64** |
 
-note: a planning task — the agent maps endpoints, methods, status codes, and response shapes. Mormor's completeness guard (*compress wording, never coverage*) keeps every enumerated item the task implies, so quality holds at baseline (4.96 on both models) while responses run -64% shorter on Sonnet and -50% on Opus; see [Notes](#notes) below.
+note: a planning task — the agent maps endpoints, methods, status codes, and response shapes. Mormor's completeness guard (*compress wording, never coverage*) keeps every enumerated item the task implies, so responses run -64% shorter on Sonnet 5, -50% on Opus, -43% on Fable. Quality holds at baseline on Opus (4.96) and Fable (4.94); on Sonnet 5 this is Mormor's softest cell (4.64 vs 4.98) — the answer stays complete, but phrasing is tightest here. See [Notes](#notes) below.
 
 ## Responses (Sonnet samples — median quality picks)
 
@@ -133,6 +133,6 @@ REST API endpoint map
 
 ## Notes
 
-Mormor compresses this scenario hard (-64% sonnet / -50% opus vs baseline) while holding quality at baseline (4.96 on both models). The completeness guard does the work: it drops filler wording but keeps every enumerated item the task implies — endpoints, methods, status codes, request/response shapes — so the shorter response stays complete. The sample above keeps all five endpoints plus the status-code line and body shapes under `### note:`.
+Mormor compresses this scenario hard (-64% sonnet 5 / -50% opus / -43% fable vs baseline). The completeness guard does the work: it drops filler wording but keeps every enumerated item the task implies — endpoints, methods, status codes, request/response shapes — so the shorter response stays complete. The sample above keeps all five endpoints plus the status-code line and body shapes under `### note:`. Quality holds at baseline on Opus (4.96) and Fable (4.94); Sonnet 5 is the softest cell (4.64), where the tighter phrasing costs a fraction of a point without dropping coverage.
 
 **Completeness-critical tasks:** if a task needs a detail that isn't obviously implied, ask for it explicitly in the prompt ("…include status codes and request/response JSON shapes"). Compression trims wording, not requested coverage.

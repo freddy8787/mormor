@@ -5,6 +5,13 @@ Mormor uses two independent version axes:
 - **Cheatsheet version** (`v1`, `v2`, …) — the protocol artifact itself; bumps when the cheatsheet body changes. Every version is frozen in [`cheatsheets/`](./cheatsheets/); `cheatsheets/DEFAULT` names the recommended pick.
 - **Repo / release version** — [SemVer](https://semver.org/), the entries below. A cheatsheet change is a **minor** bump; benchmark re-runs, docs, and tooling are **patch** bumps with the cheatsheet unchanged. 0.x is experimental.
 
+## [0.3.1] — 2026-07-03
+
+Maintenance — **cheatsheet unchanged (still v3)**.
+
+- Added **Sonnet 5** and **Fable 5** as tested models (n=50, cheatsheet v3). The headline in [`README.md`](./README.md) now uses Sonnet 5 + Opus 4.8 + Fable 5; the earlier Sonnet 4.6 results moved to the README's "Earlier results" section.
+- **Fable 5** is measured on 4 of the 5 scenarios — it declines the `delegated_chain` agent-to-agent security review under its usage policy, so that scenario is excluded for Fable.
+
 ## [0.3.0] — 2026-06-17
 
 Cheatsheet **v2 → v3** — `cheatsheets/DEFAULT` now points to [`v3`](./cheatsheets/v3.md).

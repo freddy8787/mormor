@@ -23,15 +23,15 @@ def process_user(user_id):
 
 ## Benchmark results
 
-Sonnet 4.6 + Opus 4.8, n=50 runs each, cheatsheet v3. Figures are **response-size** reduction vs baseline (cache-independent); for billed cost and the caching caveat, see the [README](../README.md#empirical-results).
+Sonnet 5 + Opus 4.8 + Fable 5, n=50 runs each, cheatsheet v3. Figures are **response-size** reduction vs baseline (cache-independent); for billed cost and the caching caveat, see the [README](../README.md#empirical-results).
 
-| variant | sonnet size Δ | sonnet quality | opus size Δ | opus quality |
-| --- | ---: | ---: | ---: | ---: |
-| baseline (verbose prose) | — | 5.00 | — | 5.00 |
-| terse (concise prose) | -54% | 5.00 | -47% | 5.00 |
-| **mormor (v3)** | **-59%** | **4.84** | **-55%** | **4.94** |
+| variant | fable 5 size Δ | fable 5 quality | opus 4.8 size Δ | opus 4.8 quality | sonnet 5 size Δ | sonnet 5 quality |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| baseline (verbose prose) | — | 5.00 | — | 5.00 | — | 5.00 |
+| terse (concise prose) | -41% | 5.00 | -47% | 5.00 | -38% | 5.00 |
+| **mormor (v3)** | **-37%** | **5.00** | **-55%** | **4.94** | **-74%** | **5.00** |
 
-note: the `### case:` table makes mormor's compression structural rather than just "fewer words". mormor runs -59% on Sonnet / -55% on Opus, a few points beyond terse, with quality holding near baseline (Sonnet 4.84, Opus 4.94 — occasionally a secondary finding is phrased more tersely).
+note: the `### case:` table makes mormor's compression structural rather than just "fewer words". mormor runs -74% on Sonnet 5 / -55% on Opus, well beyond terse, with quality holding at baseline (Sonnet 5 5.00, Opus 4.94, Fable 5.00). On Fable the raw-size gap over terse is small here (baselines are already terse), but it still wins on billed cost through caching (-42%).
 
 ## Responses (Sonnet samples)
 
@@ -136,4 +136,4 @@ user = db.query("SELECT * FROM users WHERE id = %s", (user_id,))
 
 - Mormor's `case:` table directly satisfies the user's classification framework — every finding has a row with severity + action mapped 1:1
 - `case:` saves significant bytes here vs prose: the baseline uses headers (`### Must-Fix`, `### Should-Fix`, `### Nit`) + bold text + emoji severity markers; mormor collapses all of that into one structured table
-- quality holds near baseline on both (Sonnet 4.84, Opus 4.94); the occasional point off comes from a secondary finding being phrased more tersely under the same `case:` table, not from dropping it
+- quality holds at/near baseline (Sonnet 5 5.00, Opus 4.94, Fable 5.00); any occasional point off comes from a secondary finding being phrased more tersely under the same `case:` table, not from dropping it

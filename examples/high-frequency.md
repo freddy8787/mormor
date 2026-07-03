@@ -26,15 +26,15 @@ The benchmark runs 5 different subjects through this template:
 
 ## Benchmark results
 
-Sonnet 4.6 + Opus 4.8, n=50 runs × 5 emails each, cheatsheet v3. Figures are **response-size** reduction vs baseline (cache-independent); for billed cost and the caching caveat, see the [README](../README.md#empirical-results).
+Sonnet 5 + Opus 4.8 + Fable 5, n=50 runs × 5 emails each, cheatsheet v3. Figures are **response-size** reduction vs baseline (cache-independent); for billed cost and the caching caveat, see the [README](../README.md#empirical-results).
 
-| variant | sonnet size Δ | sonnet quality | opus size Δ | opus quality |
-| --- | ---: | ---: | ---: | ---: |
-| baseline (verbose prose) | — | 5.00 | — | 5.00 |
-| terse (concise prose) | -14% | 5.00 | -12% | 5.00 |
-| **mormor (v3)** | **+14%** | **5.00** | **0%** | **5.00** |
+| variant | fable 5 size Δ | fable 5 quality | opus 4.8 size Δ | opus 4.8 quality | sonnet 5 size Δ | sonnet 5 quality |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| baseline (verbose prose) | — | 5.00 | — | 5.00 | — | 5.00 |
+| terse (concise prose) | -10% | 5.00 | -12% | 5.00 | -16% | 5.00 |
+| **mormor (v3)** | **-12%** | **5.00** | **0%** | **5.00** | **-11%** | **5.00** |
 
-note: this is Mormor's weakest scenario on response-size — the baseline is already a one-line classification + reason, so there's nothing to compress; the `### done:`/`### note:` labels add a little structure, leaving mormor about the same size as baseline (a touch larger on Sonnet). Quality is perfect (5.00 across the board). On **billed** cost it's still a win on both models — the cheatsheet caches, so the cached prefix costs little — but it's Mormor's smallest win: with a one-line answer the saving comes from caching, not from a shorter response.
+note: this is Mormor's weakest scenario on response-size — the baseline is already a one-line classification + reason, so there's little to compress; the `### done:`/`### note:` labels add a little structure, leaving mormor about the same size as baseline (slightly smaller on Sonnet 5 and Fable, same on Opus). Quality is perfect (5.00 across the board). On **billed** cost it's still a win on all three models — the cheatsheet caches, so the cached prefix costs little — but it's Mormor's smallest win: with a one-line answer the saving comes from caching, not from a shorter response.
 
 ## Sample responses (Sonnet, first email — `Your order #12345 has shipped` → transactional)
 

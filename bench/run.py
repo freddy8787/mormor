@@ -139,7 +139,7 @@ def _apply_cli_overrides(args, parser):
         wanted = {m.strip() for m in args.only_models.split(',')}
         config.MODELS = [m for m in config.MODELS if m[0] in wanted]
         if not config.MODELS:
-            parser.error(f'--only-models: no MODELS matched {sorted(wanted)} (known: opus, sonnet)')
+            parser.error(f'--only-models: no MODELS matched {sorted(wanted)} (known: opus, sonnet, fable)')
     if args.only_variants:
         wanted = [v.strip() for v in args.only_variants.split(',')]
         unknown = [v for v in wanted if v not in config.VARIANTS]

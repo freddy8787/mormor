@@ -17,17 +17,18 @@ import os
 # - label goes into the CSV `model` column and the run folder name
 # - model_id is the string passed to the Claude Code SDK / CLI
 #
-# Production default is Opus + Sonnet. Haiku has been excluded:
+# Production default is Opus + Sonnet + Fable. Haiku has been excluded:
 # it's chatty (62–74% thinking overhead vs ~37–47% on the bigger models),
 # introduces protocol-compliance noise, and prior runs showed its quality is
 # more variable.
 MODELS = [
     ('opus',   'claude-opus-4-8'),
-    ('sonnet', 'claude-sonnet-4-6'),
+    ('sonnet', 'claude-sonnet-5'),
+    ('fable',  'claude-fable-5'),
 ]
 
 # Used only when --smoke is passed. Single fast model for sanity checks.
-SMOKE_MODEL = ('sonnet', 'claude-sonnet-4-6')
+SMOKE_MODEL = ('sonnet', 'claude-sonnet-5')
 
 # Grader is held constant across model runs so quality is scored by a single
 # arbiter — eliminates "judge-bias by model under test" risk.
