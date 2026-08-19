@@ -150,6 +150,10 @@ def make_options(system_prompt, model):
         system_prompt=system_prompt,
         model=model,
         setting_sources=[],
+        # tools=[] -> `--tools ""`: send no built-in tool schemas, so the cached
+        # prefix is just the cheatsheet (not the CLI's ~14k tool/skill bundle).
+        # Keeps billed cost isolated to the cheatsheet and CLI-version-independent.
+        tools=[],
         disallowed_tools=config.DISALLOWED_TOOLS,
         max_turns=1,
     )
