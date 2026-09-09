@@ -46,15 +46,15 @@ Run this through your security reviewer AND your code-quality reviewer, then giv
 
 ## Benchmark results
 
-Sonnet 5 + Opus 5, n=50 runs × 5 hops each, cheatsheet v3. **Fable 5 is excluded from this scenario** — it declines the agent-to-agent security review under its usage policy (see [Tested models](../README.md#caveats)). Figures are **response-size** reduction vs baseline (cache-independent); for billed cost and the caching caveat, see the [README](../README.md#empirical-results).
+Sonnet 5 + Opus 5, n=50 runs × 5 hops each, cheatsheet v4. **Fable 5 is excluded from this scenario** — it declines the agent-to-agent security review under its usage policy (see [Tested models](../README.md#caveats)). Figures are **response-size** reduction vs baseline (cache-independent); for billed cost and the caching caveat, see the [README](../README.md#empirical-results).
 
 | variant | opus 5 size Δ | opus 5 quality (mean across 5 hops) | sonnet 5 size Δ | sonnet 5 quality |
 | --- | ---: | ---: | ---: | ---: |
-| baseline | — | 4.96 | — | 4.92 |
-| terse | -33% | 4.93 | -30% | 4.94 |
-| **mormor (v3)** | **-76%** | **4.98** | **-68%** | **4.90** |
+| baseline | — | 4.97 | — | 4.95 |
+| terse | -26% | 4.96 | -32% | 4.95 |
+| **mormor (v4)** | **-76%** | **4.96** | **-73%** | **4.82** |
 
-note: this is where mormor's structural advantage shines hardest — compression compounds across the 5 hops, each agent's output shrinking the next agent's input. **Sonnet 5: ~38pts shorter than terse. Opus 5: ~43pts.** Quality holds near baseline on both (Sonnet 5 4.90 vs 4.92; Opus 5 4.98 vs 4.96).
+note: this is where mormor's structural advantage shines hardest — compression compounds across the 5 hops, each agent's output shrinking the next agent's input. **Sonnet 5: ~41pts shorter than terse. Opus 5: ~50pts.** Quality holds near baseline on Opus 5 (4.96 vs 4.97); on Sonnet 5 it runs a little softer (4.82 vs 4.95) in exchange for the largest billed win on that model.
 
 ## Sample exchange — Sonnet, run 0, mormor variant (all 5 hops)
 
@@ -191,9 +191,9 @@ def get_user_by_id(user_id: int) -> Optional[User]:
 | metric | value |
 | --- | --- |
 | baseline response size (5 hops) | _high_ — verbose dispatch + verbose reports + verbose synthesis |
-| mormor response-size reduction (5 hops) | -68% sonnet 5, -76% opus 5 |
-| terse response-size reduction (5 hops) | -30% sonnet 5, -33% opus 5 |
-| **mormor's lead over terse** | **+38 pts sonnet 5, +43 pts opus 5** |
+| mormor response-size reduction (5 hops) | -73% sonnet 5, -76% opus 5 |
+| terse response-size reduction (5 hops) | -32% sonnet 5, -26% opus 5 |
+| **mormor's lead over terse** | **+41 pts sonnet 5, +50 pts opus 5** |
 
 Where mormor's structural advantage compounds:
 - **dispatch hops (0, 1)**: `goal:` + `note:` carry the brief tighter than prose framing

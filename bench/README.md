@@ -7,7 +7,8 @@ Empirical validation of Mormor against a prose baseline and a "terse prose" midd
 For each (scenario, variant, model) combination, it measures:
 
 - **input/output tokens** — separate counts for input, cache-creation, cache-read, output. `output_tokens` is the SDK's total generation count and includes any extended-thinking tokens the model emitted before the visible response. Runs use `effort='low'` (passed in [engine.py make_options](engine.py)) to dampen extended thinking where the SDK accepts it; older SDK builds silently fall back to default thinking.
-- **visible_output_tokens** — approximation of the size of the displayed response (output minus extended-thinking overhead). Computed as `len(response_text) // 4` — the English-prose folk heuristic. Real BPE tokenizers count differently on label-dense or code-dense content; an offline probe against this benchmark's response_text shows the heuristic over-counts by ~3-7% relative to a words+punct proxy, with the bias roughly uniform across variants (baseline 1.07, terse 1.03, mormor 1.04).
+- **thinking_tokens** — extended-thinking tokens, taken from the API's exact `usage.output_tokens_details.thinking_tokens` (chars/4 off the SDK's `ThinkingBlock` only as a fallback). At `effort='low'` this is ~0 on Sonnet and 1-4% of output on Opus.
+- **visible_output_tokens** — size of the displayed response, computed exactly as `output_tokens - thinking_tokens`. Both were previously estimated as `len(response_text) // 4`; measured against real counts that undercounts by ~55-60% (true density on this suite is ~2.2-2.6 chars/token, not 4) and the bias is **not** uniform across variants, so derived size-ratios carried a few points of error in either direction. Billed cost was never affected — it always used `output_tokens`.
 - **latency_ms** — how long each call took, in milliseconds (request → full response)
 - **quality_score (1–5)** — graded by Claude Haiku 4.5 (LLM-as-judge) against scenario-specific rubrics — constant grader across all runs for fair comparison
 - **format_compliance** — binary; is the response in a Mormor-compliant shape? `1` when any of the 6 labels appears at line start OR the entire response is a bare atomic answer (number / yes / no), which the cheatsheet allows for prompts with no accompanying-context requirement. `0` otherwise. Across the current scenario suite the atomic branch fires rarely — every scenario is multi-part (`category + reason`, decision-table, multi-hop synthesis), so the labeled form is the dominant compliance path.
@@ -15,7 +16,7 @@ For each (scenario, variant, model) combination, it measures:
 Aggregated metrics derived from those:
 
 - **billed_cost** — token spend with cache-aware weights (input 1.0, cache_creation 1.25, cache_read 0.10, output 5.0). These ratios match [Anthropic's published pricing multipliers](https://platform.claude.com/docs/en/about-claude/pricing): 5-minute cache write at 1.25× input, cache reads at 0.10× input, output at 5× input (consistent across Opus 4.x, Sonnet 4.x, Haiku 4.x). The 1-hour cache TTL (2× input) is not modeled — defaults to 5-min caching.
-- **vis_out_ratio** — ratio of response sizes — mormor responses divided by baseline responses (lower = better compression). Unaffected by cache state, so it's the cleanest cross-run comparison. Inherits the chars/4 approximation from `visible_output_tokens`; the bias is roughly uniform across variants (see above), so the ratio survives the approximation within a few percent of the true tokenizer ratio.
+- **vis_out_ratio** — ratio of response sizes — mormor responses divided by baseline responses (lower = better compression). Unaffected by cache state, so it's the cleanest cross-run comparison. Now exact, since `visible_output_tokens` is derived from real token counts rather than estimated.
 - **q/kt** — quality score per 1,000 tokens spent — efficiency metric (higher is better). If mormor saves tokens but loses quality at the same rate, q/kt stays flat. If it saves tokens AND keeps quality, q/kt rises.
 
 ## Scenarios
@@ -108,6 +109,7 @@ The `--resume` flag is **explicit** — there's no auto-detect. Pass the same fl
 ## Reliability
 
 - **Per-call atomic save:** rows are persisted incrementally (tmp file + rename) after each call. Mid-run crashes don't lose more than one row.
+- **Usage-limit notices:** when the plan limit is reached the CLI returns its limit notice ("You've hit your session limit ...") as ordinary assistant text with exit 0. The runner rejects these (`UsageLimitError`) and retries rather than recording them as responses — left unchecked they land in the CSV as real rows and silently poison every aggregate. If the limit outlasts the retry budget the run fails loudly and `--resume` picks it up later.
 - **Retry:** transient SDK errors (e.g. "Command failed exit 1") get exponential-backoff retry — up to 7 retries (8 attempts total) before failing the call. Grader calls retry up to 4 times (5 attempts total); on exhaustion the row records `quality_score=0` and the run continues.
 - **Disallowed tools:** the agent runs with no tool access (no Task, Bash, Edit, etc.) so the benchmark measures system-prompt + user-prompt → text-response, with nothing else in the loop.
 
@@ -178,7 +180,7 @@ Edit `config.py` to retarget models or change cost weights. Edit `scenarios.py` 
 
 ## Limitations
 
-- Two production models tested (Sonnet 4.6, Opus 4.8; earlier Opus 4.7 results retained in the README's "Earlier results"). Smaller / faster models can be added to `MODELS` if useful.
+- Three production models tested (Sonnet 5, Opus 5, Fable 5; earlier model results retained in the README's "Earlier results"). Fable is measured on 4 of the 5 scenarios — it declines `delegated_chain` under its usage policy. Smaller / faster models can be added to `MODELS` if useful.
 - Five scenarios. Coverage is intentionally narrow but representative; broader workload coverage is a future expansion.
 - Quality grader is itself a model. We use a constant grader and per-scenario rubrics to mitigate, but absolute quality scores are noisier than relative comparisons.
 - Cache-aware billed cost uses standard public-pricing weights. Your actual cost depends on your contract.

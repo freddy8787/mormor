@@ -26,7 +26,9 @@ import datetime
 import json
 import os
 import random
+import re
 import socket
+import sys
 import time
 
 import anyio
@@ -36,6 +38,7 @@ from claude_agent_sdk import (
     ClaudeSDKClient,
     ResultMessage,
     TextBlock,
+    ThinkingBlock,
     query,
 )
 
@@ -163,19 +166,64 @@ def make_options(system_prompt, model):
         return ClaudeAgentOptions(**base)
 
 
+# A runaway generation can park ~65k tokens of text in one `response_text`
+# cell, past csv's default 128KB field cap — which would make `--resume`
+# unreadable for the rest of that run.
+csv.field_size_limit(sys.maxsize)
+
+
+class UsageLimitError(RuntimeError):
+    """The CLI printed a plan/usage-limit notice instead of a model response.
+
+    It arrives as ordinary assistant text with exit 0, so nothing else marks
+    it as a failure — left unchecked it lands in the CSV as a real response
+    and silently poisons every aggregate.
+    """
+
+
+# Matches the CLI's limit notices, e.g.
+# "You've hit your session limit · resets 3:50pm (Asia/Bangkok)".
+_LIMIT_RE = re.compile(
+    r"(hit your (session|usage|plan) limit"
+    r"|resets \d{1,2}(:\d{2})?\s*[ap]m"
+    r"|upgrade to increase your usage limit"
+    r"|rate limit exceeded)",
+    re.I,
+)
+
+
+def _reject_limit_notice(text):
+    """Raise if `text` is a limit notice rather than a model response.
+
+    Bounded by length so a genuine response *discussing* rate limits (the
+    benchmark asks about API design) is never mistaken for one.
+    """
+    if len(text) < 300 and _LIMIT_RE.search(text):
+        raise UsageLimitError(text.strip())
+
+
 def extract_metrics(messages, latency_ms):
-    """Pull response_text + usage tokens out of a returned message stream."""
+    """Pull response_text + thinking_text + usage tokens out of a message stream."""
     response_text = ''
+    thinking_text = ''
     usage = {}
     for m in messages:
         if isinstance(m, AssistantMessage):
             for block in m.content:
                 if isinstance(block, TextBlock):
                     response_text += block.text
+                elif isinstance(block, ThinkingBlock):
+                    thinking_text += block.thinking
         elif isinstance(m, ResultMessage):
             usage = m.usage or {}
+    # The API reports thinking tokens exactly; the ThinkingBlock text is only
+    # a chars/4 fallback for builds that omit the detail field.
+    details = usage.get('output_tokens_details') or {}
+    _reject_limit_notice(response_text)
     return {
         'response_text': response_text,
+        'thinking_text': thinking_text,
+        'thinking_tokens_api': details.get('thinking_tokens'),
         'input_tokens': usage.get('input_tokens', 0),
         'output_tokens': usage.get('output_tokens', 0),
         'cache_read_tokens': usage.get('cache_read_input_tokens', 0),
@@ -270,6 +318,7 @@ async def _grade_with_prompt(grading_prompt, max_retries=5):
                         if isinstance(block, TextBlock):
                             text += block.text
             text = text.strip()
+            _reject_limit_notice(text)
             try:
                 return int(text[0])
             except (ValueError, IndexError):
@@ -383,23 +432,23 @@ RESPONSE FROM THIS AGENT (grade this):
 def record(scenario, variant, model_label, run_n, turn, metrics, score):
     """Build one CSV row from a metrics dict + quality score.
 
-    visible_output_tokens approximates the size of the actual displayed
-    response text. The SDK's output_tokens INCLUDES extended-thinking
-    tokens (some models think before responding by default). Subtracting
-    visible from output gives a rough thinking_overhead estimate.
+    thinking_tokens is the API's exact extended-thinking count (chars/4 off
+    the ThinkingBlock text only as a fallback for builds omitting the detail
+    field). visible_output_tokens is then exact too: output_tokens covers
+    thinking plus visible text, so subtracting one gives the other.
 
-    Approximation note: `len(text) // 4` is the English-prose folk
-    heuristic (~4 chars/token). Real BPE tokenizers count differently for
-    label-dense or code-dense content (more punctuation tokens, shorter
-    identifier tokens). An offline probe against this benchmark's
-    response_text showed the heuristic OVER-counts by ~3-7% across all
-    three variants (baseline 1.07, terse 1.03, mormor 1.04 vs a
-    words+punct proxy), with per-scenario variance in both directions but
-    roughly uniform between variants within each scenario. Net effect:
-    the mormor/baseline `vis_out_ratio` is robust to within a few percent
-    of the "true" tokenizer ratio.
+    Both were previously approximated as `len(text) // 4`, the English-prose
+    folk heuristic. Measured against real counts that undercounts by ~55-60%
+    on this suite (true density is ~2.2-2.6 chars/token on label- and
+    code-dense responses, not 4), and the bias is NOT uniform across variants
+    — mormor sits at a different density from baseline, so the derived
+    size-ratio carried a few points of error in either direction depending on
+    model. Billed cost was never affected: it always used output_tokens.
     """
-    visible_output = len(metrics['response_text']) // 4
+    thinking = metrics.get('thinking_tokens_api')
+    if thinking is None:
+        thinking = len(metrics.get('thinking_text', '')) // 4
+    visible_output = max(0, metrics['output_tokens'] - thinking)
     return {
         'scenario': scenario,
         'variant': variant,
@@ -409,6 +458,7 @@ def record(scenario, variant, model_label, run_n, turn, metrics, score):
         'input_tokens': metrics['input_tokens'],
         'output_tokens': metrics['output_tokens'],
         'visible_output_tokens': visible_output,
+        'thinking_tokens': thinking,
         'cache_read_tokens': metrics['cache_read_tokens'],
         'cache_creation_tokens': metrics['cache_creation_tokens'],
         'latency_ms': metrics['latency_ms'],
@@ -450,7 +500,7 @@ def load_existing(path):
         return []
     int_fields = (
         'run_n', 'turn', 'input_tokens', 'output_tokens',
-        'visible_output_tokens', 'cache_read_tokens',
+        'visible_output_tokens', 'thinking_tokens', 'cache_read_tokens',
         'cache_creation_tokens', 'latency_ms', 'quality_score',
         'format_compliance',
     )

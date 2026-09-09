@@ -178,7 +178,7 @@ def _print_averages(results, scenarios, variants, models):
         # billed = weighted cost (cache_read at 0.10x, output at 5x) — the
         # cross-run-stable cost metric. total = raw face-value sum (noisy).
         print(f'{"scenario":<22} {"variant":<10} {"in_new":<7} {"in_cache":<9} '
-              f'{"out":<6} {"vis_out":<8} {"total":<7} {"billed":<7} {"lat_s":<6} '
+              f'{"out":<6} {"vis_out":<8} {"think":<6} {"total":<7} {"billed":<7} {"lat_s":<6} '
               f'{"qual":<5} {"q/kt":<6} {"q_std":<6} {"q0":<3} {"fmt%":<5}')
         for scenario in scenarios:
             for variant in variants:
@@ -189,6 +189,7 @@ def _print_averages(results, scenarios, variants, models):
                 in_cache = sum(r['cache_read_tokens'] + r['cache_creation_tokens'] for r in rs) / len(rs)
                 out = sum(r['output_tokens'] for r in rs) / len(rs)
                 vis_out = sum(r['visible_output_tokens'] for r in rs) / len(rs)
+                think = sum(r.get('thinking_tokens', 0) or 0 for r in rs) / len(rs)
                 total = in_new + in_cache + out
                 billed = _avg_billed(rs)
                 qmean, qstd, _, _ = _qual_stats(rs)
@@ -197,7 +198,7 @@ def _print_averages(results, scenarios, variants, models):
                 q0 = _n_grader_zero(rs)
                 fmt_pct = 100 * _avg_fmt(rs)
                 print(f'{scenario:<22} {variant:<10} {in_new:<7.0f} {in_cache:<9.0f} '
-                      f'{out:<6.0f} {vis_out:<8.0f} {total:<7.0f} {billed:<7.0f} '
+                      f'{out:<6.0f} {vis_out:<8.0f} {think:<6.0f} {total:<7.0f} {billed:<7.0f} '
                       f'{lat_s:<6.1f} {qmean:<5.2f} {qkt:<6.2f} {qstd:<6.2f} '
                       f'{q0:<3d} {fmt_pct:<5.0f}')
 

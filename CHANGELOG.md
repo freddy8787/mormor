@@ -5,6 +5,15 @@ Mormor uses two independent version axes:
 - **Cheatsheet version** (`v1`, `v2`, …) — the protocol artifact itself; bumps when the cheatsheet body changes. Every version is frozen in [`cheatsheets/`](./cheatsheets/); `cheatsheets/DEFAULT` names the recommended pick.
 - **Repo / release version** — [SemVer](https://semver.org/), the entries below. A cheatsheet change is a **minor** bump; benchmark re-runs, docs, and tooling are **patch** bumps with the cheatsheet unchanged. 0.x is experimental.
 
+## [0.4.0] — 2026-09-09
+
+Cheatsheet **v3 → v4** — `cheatsheets/DEFAULT` now points to [`v4`](./cheatsheets/v4.md); v3 stays frozen.
+
+- **v4 cheatsheet:** adds an implied-coverage rule and a `note:` discipline rule; body tightened throughout.
+- **Resolves the one soft quality cell** — Sonnet 5 `single_round_trip` **4.64 → 5.00**. Sonnet 5 aggregate: billed -62% → **-65%**, quality 4.87 → **4.92**.
+- Re-validated at n=50 on all three models. Fable 5 -45% → **-46%**; Opus 5 holds at **-61%**. Numbers in [`README.md`](./README.md).
+- **Benchmark fixes:** usage-limit notices are no longer recorded as responses; `thinking_tokens` and `visible_output_tokens` now come from exact API counts instead of a chars/4 estimate (billed cost was unaffected). Corrected v0.3.2 Opus 5 figures: aggregate -61%, `multi_turn` -51%.
+
 ## [0.3.2] — 2026-08-19
 
 Maintenance — **cheatsheet unchanged (still v3)**.

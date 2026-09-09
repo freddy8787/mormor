@@ -23,15 +23,15 @@ def process_user(user_id):
 
 ## Benchmark results
 
-Sonnet 5 + Opus 5 + Fable 5, n=50 runs each, cheatsheet v3. Figures are **response-size** reduction vs baseline (cache-independent); for billed cost and the caching caveat, see the [README](../README.md#empirical-results).
+Sonnet 5 + Opus 5 + Fable 5, n=50 runs each, cheatsheet v4. Figures are **response-size** reduction vs baseline (cache-independent); for billed cost and the caching caveat, see the [README](../README.md#empirical-results).
 
 | variant | fable 5 size Δ | fable 5 quality | opus 5 size Δ | opus 5 quality | sonnet 5 size Δ | sonnet 5 quality |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: |
 | baseline (verbose prose) | — | 5.00 | — | 5.00 | — | 5.00 |
-| terse (concise prose) | -41% | 5.00 | -49% | 5.00 | -38% | 5.00 |
-| **mormor (v3)** | **-37%** | **5.00** | **-75%** | **5.00** | **-74%** | **5.00** |
+| terse (concise prose) | -49% | 5.00 | -45% | 5.00 | -46% | 5.00 |
+| **mormor (v4)** | **-43%** | **5.00** | **-75%** | **5.00** | **-77%** | **4.96** |
 
-note: the `### case:` table makes mormor's compression structural rather than just "fewer words". mormor runs -75% on Opus 5 / -74% on Sonnet 5, well beyond terse, with quality holding at baseline (Sonnet 5 5.00, Opus 5 5.00, Fable 5.00). On Fable the raw-size gap over terse is small here (baselines are already terse), but it still wins on billed cost through caching (-42%).
+note: the `### case:` table makes mormor's compression structural rather than just "fewer words". mormor runs -75% on Opus 5 / -77% on Sonnet 5, well beyond terse, with quality holding at baseline (Opus 5 5.00, Fable 5.00, Sonnet 5 4.96). On Fable the raw-size gap over terse is small here (baselines are already terse), but it still wins on billed cost through caching (-45%).
 
 ## Responses (Sonnet samples)
 

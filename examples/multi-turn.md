@@ -26,13 +26,13 @@ Turn 5: Going with transactions. Can you sketch the pytest fixture?
 
 ## Benchmark results
 
-Sonnet 5 + Opus 5 + Fable 5, n=50 runs each, 5 turns per run, cheatsheet v3. Figures are **response-size** reduction vs baseline (cache-independent); for billed cost and the caching caveat, see the [README](../README.md#empirical-results).
+Sonnet 5 + Opus 5 + Fable 5, n=50 runs each, 5 turns per run, cheatsheet v4. Figures are **response-size** reduction vs baseline (cache-independent); for billed cost and the caching caveat, see the [README](../README.md#empirical-results).
 
 | variant | fable 5 size Δ | fable 5 quality (mean) | opus 5 size Δ | opus 5 quality | sonnet 5 size Δ | sonnet 5 quality |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: |
-| baseline | — | 4.96 | — | 4.86 | — | 4.95 |
-| terse | -32% | 4.95 | -15% | 4.91 | -28% | 4.91 |
-| **mormor (v3)** | **-52%** | **4.96** | **-36%** | **4.94** | **-58%** | **4.82** |
+| baseline | — | 4.99 | — | 4.96 | — | 4.95 |
+| terse | -33% | 4.95 | -26% | 4.96 | -27% | 4.94 |
+| **mormor (v4)** | **-57%** | **4.94** | **-47%** | **4.98** | **-62%** | **4.84** |
 
 note: mormor compresses -58% on Sonnet 5 / -36% on Opus 5 / -52% on Fable, well beyond terse (-28% / -15% / -32%), so the structured form pulls clearly ahead. Quality stays close to baseline (Sonnet 5 4.82 vs 4.95; Opus 5 4.94 vs 4.86; Fable 4.96 vs 4.96) — on Sonnet 5 this is Mormor's softest multi_turn quality, though still within ~0.1 of baseline; on Opus 5 mormor lands above baseline.
 
