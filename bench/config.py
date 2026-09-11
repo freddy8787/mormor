@@ -24,7 +24,7 @@ import os
 MODELS = [
     ('opus',   'claude-opus-5'),
     ('sonnet', 'claude-sonnet-5'),
-    ('fable',  'claude-fable-5'),
+    ('fable',  'claude-fable-5-1'),
 ]
 
 # Used only when --smoke is passed. Single fast model for sanity checks.
@@ -59,6 +59,11 @@ COST_WEIGHTS = {
     'cache_read':      0.10,   # ~90% cheaper than fresh input
     'output':          5.0,    # output ~5x input cost
 }
+
+# Rows at or above this many output tokens are runaways — a call looping to
+# the output limit rather than answering. Reporting drops the runs containing
+# them. Sits in an empty gap: the largest legitimate response is ~6.3k.
+RUNAWAY_TOKENS = 10_000
 
 # Tools that Claude Code might auto-invoke through the SDK. The benchmark is a
 # pure system+user → text-response test; any tool call would pollute metrics

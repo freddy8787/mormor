@@ -120,6 +120,7 @@ The `--resume` flag is **explicit** — there's no auto-detect. Pass the same fl
 - **Cache state is non-deterministic across runs.** `cache_read_input_tokens` swings between runs due to prompt-cache eviction. Cross-run comparisons should prefer `vis_out_ratio` or `billed_cost`, not raw `input_tokens`.
 - **Multi-turn caveat.** Multi-turn scenarios accumulate cache across turns; compression appears smaller on raw token counts because cache_read dwarfs visible output. The `billed_cost` weighting (cache_read at 0.10× input per Anthropic's published rate) reflects real spend.
 - **Grader=0 handling.** When grader retries exhaust (e.g. during plan-limit windows), the row records `quality_score=0`. The summary's quality aggregations (`qual`, `q_std`, `q/kt`, the `qual_drop` used by verdicts) automatically exclude these rows. The averages table's `q0` column shows the count of excluded rows per cell, and `meta.json.rows_grader_zero` gives the run total. If you re-aggregate a CSV yourself, filter with `quality_score > 0`.
+- **Runaway handling.** Occasionally a model loops — re-emitting the same tool call until the output limit — instead of answering (seen on Fable 5.1's prose variants on code-investigation prompts). The summary drops every run containing a row at or above `config.RUNAWAY_TOKENS` (10k output tokens; the largest legitimate response in the suite is ~6.3k), and prints how many runs it excluded. The whole run goes, since a looping turn or hop is fed into every later one.
 
 ## Cleanup snippets
 
@@ -180,7 +181,8 @@ Edit `config.py` to retarget models or change cost weights. Edit `scenarios.py` 
 
 ## Limitations
 
-- Three production models tested (Sonnet 5, Opus 5, Fable 5; earlier model results retained in the README's "Earlier results"). Fable is measured on 4 of the 5 scenarios — it declines `delegated_chain` under its usage policy. Smaller / faster models can be added to `MODELS` if useful.
+- Three production models tested (Sonnet 5, Opus 5, Fable 5.1; earlier model results retained in the README's "Earlier results"). Smaller / faster models can be added to `MODELS` if useful.
+- Billed cost depends on the client as well as the protocol: whether the short baseline prompt caches changes with the CLI's prompt preamble and each model's caching threshold. Fable 5.1 was measured on a newer CLI where it does, so its billed Δ is not directly comparable to Opus 5 / Sonnet 5 — use response size for that.
 - Five scenarios. Coverage is intentionally narrow but representative; broader workload coverage is a future expansion.
 - Quality grader is itself a model. We use a constant grader and per-scenario rubrics to mitigate, but absolute quality scores are noisier than relative comparisons.
 - Cache-aware billed cost uses standard public-pricing weights. Your actual cost depends on your contract.

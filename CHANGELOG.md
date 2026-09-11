@@ -5,6 +5,15 @@ Mormor uses two independent version axes:
 - **Cheatsheet version** (`v1`, `v2`, …) — the protocol artifact itself; bumps when the cheatsheet body changes. Every version is frozen in [`cheatsheets/`](./cheatsheets/); `cheatsheets/DEFAULT` names the recommended pick.
 - **Repo / release version** — [SemVer](https://semver.org/), the entries below. A cheatsheet change is a **minor** bump; benchmark re-runs, docs, and tooling are **patch** bumps with the cheatsheet unchanged. 0.x is experimental.
 
+## [0.4.1] — 2026-09-11
+
+Maintenance — **cheatsheet unchanged (still v4)**.
+
+- Added **Fable 5.1** as a tested model (n=50), replacing Fable 5 in the headline; Fable 5 moved to "Earlier results". Fable 5.1 runs all 5 scenarios, including `delegated_chain`. Mormor: billed **-40%**, response size **0.56×** baseline, quality 4.98.
+- Fable 5.1 was measured on a newer CLI where the baseline prompt caches too, so its billed Δ is not directly comparable to Opus 5 / Sonnet 5.
+- **Benchmark:** the summary now excludes runs containing a runaway (a call looping to the output limit).
+- Fixed stale v3 figures left in the README and examples by 0.4.0.
+
 ## [0.4.0] — 2026-09-09
 
 Cheatsheet **v3 → v4** — `cheatsheets/DEFAULT` now points to [`v4`](./cheatsheets/v4.md); v3 stays frozen.

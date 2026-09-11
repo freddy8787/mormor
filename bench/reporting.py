@@ -141,12 +141,30 @@ def _filter(results, **kwargs):
 
 # --- summary ---
 
+def _drop_runaways(results):
+    """Exclude every run that contains a runaway row.
+
+    A runaway is a call that loops until the output limit (~64k tokens)
+    instead of answering; the largest legitimate response in the suite is
+    ~6.3k. The whole run goes, because a looping turn or hop is fed into
+    every later one.
+    """
+    bad = {(r['scenario'], r['variant'], r['model'], r['run_n'])
+           for r in results if r['output_tokens'] >= config.RUNAWAY_TOKENS}
+    if bad:
+        print(f'\n[excluded {len(bad)} run(s) containing a runaway '
+              f'(output >= {config.RUNAWAY_TOKENS} tokens)]')
+    return [r for r in results
+            if (r['scenario'], r['variant'], r['model'], r['run_n']) not in bad]
+
+
 def print_summary(results):
     """Print the full multi-section summary table to stdout.
 
     Caller wires stdout to wherever the summary should land (terminal,
     run.log, summary.txt).
     """
+    results = _drop_runaways(results)
     scenarios = sorted(set(r['scenario'] for r in results))
     # Preserve config.MODELS order; only include models that actually appear.
     models = [m for m, _ in config.MODELS if any(r['model'] == m for r in results)]
