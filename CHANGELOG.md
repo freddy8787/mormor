@@ -5,6 +5,12 @@ Mormor uses two independent version axes:
 - **Cheatsheet version** (`v1`, `v2`, …) — the protocol artifact itself; bumps when the cheatsheet body changes. Every version is frozen in [`cheatsheets/`](./cheatsheets/); `cheatsheets/DEFAULT` names the recommended pick.
 - **Repo / release version** — [SemVer](https://semver.org/), the entries below. A cheatsheet change is a **minor** bump; benchmark re-runs, docs, and tooling are **patch** bumps with the cheatsheet unchanged. 0.x is experimental.
 
+## [0.4.2] — 2026-09-24
+
+Maintenance — **cheatsheet unchanged (still v4)**.
+
+- Added **Opus 5.5** as a tested model, replacing Opus 5 in the headline; Opus 5 moved to "Earlier results".
+
 ## [0.4.1] — 2026-09-11
 
 Maintenance — **cheatsheet unchanged (still v4)**.

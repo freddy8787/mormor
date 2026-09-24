@@ -46,15 +46,15 @@ Run this through your security reviewer AND your code-quality reviewer, then giv
 
 ## Benchmark results
 
-Sonnet 5 + Opus 5 + Fable 5.1, n=50 runs × 5 hops each, cheatsheet v4; quality is the mean across the 5 hops. Figures are **response-size** reduction vs baseline (cache-independent); for billed cost and the caching caveat, see the [README](../README.md#empirical-results).
+Sonnet 5 + Opus 5.5 + Fable 5.1, n=50 runs × 5 hops each, cheatsheet v4; quality is the mean across the 5 hops. Figures are **response-size** reduction vs baseline (cache-independent); for billed cost and the caching caveat, see the [README](../README.md#empirical-results).
 
-| variant | fable 5.1 size Δ | fable 5.1 quality | opus 5 size Δ | opus 5 quality | sonnet 5 size Δ | sonnet 5 quality |
+| variant | fable 5.1 size Δ | fable 5.1 quality | opus 5.5 size Δ | opus 5.5 quality | sonnet 5 size Δ | sonnet 5 quality |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: |
-| baseline | — | 4.93 | — | 4.97 | — | 4.95 |
-| terse | -33% | 4.93 | -26% | 4.96 | -32% | 4.95 |
-| **mormor (v4)** | **-59%** | **4.96** | **-76%** | **4.96** | **-73%** | **4.82** |
+| baseline | — | 4.93 | — | 4.93 | — | 4.95 |
+| terse | -33% | 4.93 | -17% | 4.95 | -32% | 4.95 |
+| **mormor (v4)** | **-59%** | **4.96** | **-42%** | **4.92** | **-73%** | **4.82** |
 
-note: this is where mormor's structural advantage shines hardest — compression compounds across the 5 hops, each agent's output shrinking the next agent's input. **Fable 5.1: ~26pts shorter than terse. Opus 5: ~50pts. Sonnet 5: ~41pts.** Quality holds at or above baseline on Fable 5.1 (4.96 vs 4.93) and Opus 5 (4.96 vs 4.97); on Sonnet 5 it runs a little softer (4.82 vs 4.95) in exchange for the largest billed win on that model.
+note: this is where mormor's structural advantage shines hardest — compression compounds across the 5 hops, each agent's output shrinking the next agent's input. **Fable 5.1: ~26pts shorter than terse. Opus 5.5: ~25pts. Sonnet 5: ~41pts.** Quality holds at or near baseline on Fable 5.1 (4.96 vs 4.93) and Opus 5.5 (4.92 vs 4.93); on Sonnet 5 it runs a little softer (4.82 vs 4.95) in exchange for the largest billed win on that model.
 
 ## Sample exchange — Sonnet, run 0, mormor variant (all 5 hops)
 
@@ -191,9 +191,9 @@ def get_user_by_id(user_id: int) -> Optional[User]:
 | metric | value |
 | --- | --- |
 | baseline response size (5 hops) | _high_ — verbose dispatch + verbose reports + verbose synthesis |
-| mormor response-size reduction (5 hops) | -59% fable 5.1, -76% opus 5, -73% sonnet 5 |
-| terse response-size reduction (5 hops) | -33% fable 5.1, -26% opus 5, -32% sonnet 5 |
-| **mormor's lead over terse** | **+26 pts fable 5.1, +50 pts opus 5, +41 pts sonnet 5** |
+| mormor response-size reduction (5 hops) | -59% fable 5.1, -42% opus 5.5, -73% sonnet 5 |
+| terse response-size reduction (5 hops) | -33% fable 5.1, -17% opus 5.5, -32% sonnet 5 |
+| **mormor's lead over terse** | **+26 pts fable 5.1, +25 pts opus 5.5, +41 pts sonnet 5** |
 
 Where mormor's structural advantage compounds:
 - **dispatch hops (0, 1)**: `goal:` + `note:` carry the brief tighter than prose framing

@@ -26,15 +26,15 @@ Turn 5: Going with transactions. Can you sketch the pytest fixture?
 
 ## Benchmark results
 
-Sonnet 5 + Opus 5 + Fable 5.1, n=50 runs each, 5 turns per run, cheatsheet v4. Figures are **response-size** reduction vs baseline (cache-independent); for billed cost and the caching caveat, see the [README](../README.md#empirical-results).
+Sonnet 5 + Opus 5.5 + Fable 5.1, n=50 runs each, 5 turns per run, cheatsheet v4. Figures are **response-size** reduction vs baseline (cache-independent); for billed cost and the caching caveat, see the [README](../README.md#empirical-results).
 
-| variant | fable 5.1 size Δ | fable 5.1 quality (mean) | opus 5 size Δ | opus 5 quality | sonnet 5 size Δ | sonnet 5 quality |
+| variant | fable 5.1 size Δ | fable 5.1 quality (mean) | opus 5.5 size Δ | opus 5.5 quality | sonnet 5 size Δ | sonnet 5 quality |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: |
-| baseline | — | 4.55 | — | 4.96 | — | 4.95 |
-| terse | -33% | 4.76 | -26% | 4.96 | -27% | 4.94 |
-| **mormor (v4)** | **-39%** | **4.94** | **-47%** | **4.98** | **-62%** | **4.84** |
+| baseline | — | 4.55 | — | 4.92 | — | 4.95 |
+| terse | -33% | 4.76 | -24% | 4.92 | -27% | 4.94 |
+| **mormor (v4)** | **-39%** | **4.94** | **-31%** | **4.94** | **-62%** | **4.84** |
 
-note: mormor compresses -62% on Sonnet 5 / -47% on Opus 5 / -39% on Fable 5.1, well beyond terse (-27% / -26% / -33%), so the structured form pulls clearly ahead. Quality stays close to or above baseline (Sonnet 5 4.84 vs 4.95; Opus 5 4.98 vs 4.96; Fable 5.1 4.94 vs 4.55). Fable 5.1's prose baseline occasionally loops on this debugging prompt until the output limit; those runs are excluded, and mormor never looped.
+note: mormor compresses -62% on Sonnet 5 / -39% on Fable 5.1 / -31% on Opus 5.5, beyond terse (-27% / -33% / -24%), so the structured form pulls ahead. Quality stays close to or above baseline (Sonnet 5 4.84 vs 4.95; Fable 5.1 4.94 vs 4.55; Opus 5.5 4.94 vs 4.92). On Fable 5.1 and Opus 5.5 the prose baseline occasionally loops on this debugging prompt until the output limit; those runs are excluded, and mormor never looped.
 
 ## Sample exchange — Sonnet, run 0, mormor variant (full 5 turns)
 
@@ -199,4 +199,4 @@ def test_pipeline_assumes_empty_table(db):
 
 - mormor uses `### done:` to lead each turn (so the user can scan the headline answer first), then organizes details under `### case:` tables or labeled bullets
 - compression in multi-turn is dominated by conversation cache — by turn 5, the input has accumulated all 4 prior turns + responses; mormor's smaller responses keep the cache lean
-- per-turn mean quality 4.84 sonnet 5 / 4.98 opus 5 / 4.94 fable 5.1 — close to or above baseline (4.95 / 4.96 / 4.55); mormor format compliance is 100% on all three
+- per-turn mean quality 4.84 sonnet 5 / 4.94 opus 5.5 / 4.94 fable 5.1 — close to or above baseline (4.95 / 4.92 / 4.55); mormor format compliance is 100% on all three
