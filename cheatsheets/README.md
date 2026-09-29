@@ -7,17 +7,18 @@ The cheatsheet is versioned independently from the repo/release version.
 
 ## Which one to use
 
-Paste the **recommended** version — currently [`v4.md`](./v4.md). The recommended pick is named in [`DEFAULT`](./DEFAULT): it's the most stable, general one, and not necessarily the highest number (specialized or experimental versions may also live here). Reference a specific version so your setup is pinned and reproducible.
+Paste the **recommended** version — currently [`v5.md`](./v5.md). The recommended pick is named in [`DEFAULT`](./DEFAULT): it's the most stable, general one, and not necessarily the highest number (specialized or experimental versions may also live here). Reference a specific version so your setup is pinned and reproducible.
 
 ## Files
 
 | file | role |
 | --- | --- |
-| [`v4.md`](./v4.md) | frozen cheatsheet v4 — **the recommended pick** (validated at n=50 in [`../README.md`](../README.md)). Paste this. |
+| [`v5.md`](./v5.md) | frozen cheatsheet v5 — **the recommended pick** (validated at n=50 in [`../README.md`](../README.md)). Paste this. |
+| [`v4.md`](./v4.md) | frozen cheatsheet v4 — superseded by v5. Kept for reference/reproducibility. |
 | [`v3.md`](./v3.md) | frozen cheatsheet v3 — superseded by v4. Kept for reference/reproducibility. |
 | [`v2.md`](./v2.md) | frozen cheatsheet v2 — superseded by v3. Kept for reference/reproducibility. |
 | [`v1.md`](./v1.md) | frozen cheatsheet v1 — the initial release artifact (the exact bytes benchmarked for v0.1.0). Kept for reference/reproducibility. |
-| `DEFAULT` | names the recommended version (currently `v4`) |
+| `DEFAULT` | names the recommended version (currently `v5`) |
 
 ## Adding a new version
 

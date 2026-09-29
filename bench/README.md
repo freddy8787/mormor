@@ -182,7 +182,7 @@ Edit `config.py` to retarget models or change cost weights. Edit `scenarios.py` 
 ## Limitations
 
 - Three production models tested (Sonnet 5, Opus 5.5, Fable 5.1; earlier model results retained in the README's "Earlier results"). Smaller / faster models can be added to `MODELS` if useful.
-- Billed cost depends on the client as well as the protocol: whether the short baseline prompt caches changes with the CLI's prompt preamble and each model's caching threshold. Fable 5.1 and Opus 5.5 were measured on a newer CLI where it does, so their billed Δ is not directly comparable to Sonnet 5's — use response size for that.
+- Billed cost depends on the client as well as the protocol: whether the short baseline prompt caches changes with the CLI's prompt preamble and each model's caching threshold. On the current CLI it does, which narrows the billed gap without changing the compression — compare across CLI versions on response size, not billed cost. The CLI also updates itself every few days and a bump can change the preamble, so for a multi-day run pin one CLI build for the whole run.
 - Five scenarios. Coverage is intentionally narrow but representative; broader workload coverage is a future expansion.
 - Quality grader is itself a model. We use a constant grader and per-scenario rubrics to mitigate, but absolute quality scores are noisier than relative comparisons.
 - Cache-aware billed cost uses standard public-pricing weights. Your actual cost depends on your contract.

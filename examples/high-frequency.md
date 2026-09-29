@@ -26,15 +26,15 @@ The benchmark runs 5 different subjects through this template:
 
 ## Benchmark results
 
-Sonnet 5 + Opus 5.5 + Fable 5.1, n=50 runs × 5 emails each, cheatsheet v4. Figures are **response-size** reduction vs baseline (cache-independent); for billed cost and the caching caveat, see the [README](../README.md#empirical-results).
+Sonnet 5 + Opus 5.5 + Fable 5.1, n=50 runs × 5 emails each, cheatsheet v5. Figures are **response-size** reduction vs baseline (cache-independent); for billed cost and the caching caveat, see the [README](../README.md#empirical-results).
 
 | variant | fable 5.1 size Δ | fable 5.1 quality | opus 5.5 size Δ | opus 5.5 quality | sonnet 5 size Δ | sonnet 5 quality |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: |
 | baseline (verbose prose) | — | 5.00 | — | 5.00 | — | 5.00 |
-| terse (concise prose) | -8% | 5.00 | -7% | 5.00 | -15% | 5.00 |
-| **mormor (v4)** | **-22%** | **5.00** | **-14%** | **5.00** | **-15%** | **5.00** |
+| terse (concise prose) | -9% | 5.00 | -7% | 5.00 | -16% | 5.00 |
+| **mormor (v5)** | **-23%** | **5.00** | **-15%** | **5.00** | **-24%** | **5.00** |
 
-note: this is Mormor's weakest scenario on response-size — the baseline is already a one-line classification + reason, so there's little to compress; the `### done:`/`### note:` labels add a little structure, leaving mormor only modestly smaller than baseline (-14% to -22%). Quality is perfect (5.00 across the board). On **billed** cost it's a win on Sonnet 5 — the cheatsheet caches, so the cached prefix costs little — but it's Mormor's smallest win: with a one-line answer the saving comes from caching, not from a shorter response. On Fable 5.1 and Opus 5.5, measured on a newer CLI where the baseline prompt caches too, that saving disappears and it becomes a small billed loss (see the [README](../README.md#empirical-results)).
+note: this is Mormor's weakest scenario — the baseline is already a one-line classification + reason, so there's little to compress; the `### done:`/`### note:` labels add a little structure, leaving mormor only modestly smaller than baseline (-15% to -24%). Quality is perfect (5.00 across the board). On **billed** cost it's a small loss on all three models: with a one-line answer the saving used to come from caching rather than a shorter response, and on the current CLI the baseline prompt caches too (see the [README](../README.md#empirical-results)).
 
 ## Sample responses (Sonnet, first email — `Your order #12345 has shipped` → transactional)
 
@@ -68,7 +68,7 @@ order status notification triggered by a specific user action (purchase)
 ```
 (~28 vis_out tokens)
 
-note: visible output is similar across terse and mormor here (~20–25 tokens) — the shape differs (mormor uses h3 labels, terse uses bold + dash), but there's no big byte gap on an already-tiny answer. The billed win comes from the cached cheatsheet prefix and structural consistency, not from dramatic byte reduction.
+note: visible output is similar across terse and mormor here (~20–25 tokens) — the shape differs (mormor uses h3 labels, terse uses bold + dash), but there's no big byte gap on an already-tiny answer.
 
 ## Atomic-output note
 

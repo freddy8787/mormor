@@ -4,7 +4,7 @@ A parent agent receives a PR review request and dispatches it to TWO specialist 
 
 This is the canonical agentic pattern Mormor was designed for: compression compounds across hops, AND across siblings whose outputs both feed back to the parent.
 
-Note the dispatch hops (0 and 1) below: the parent's brief *to* each child is itself in Mormor (`### goal:` + `### note:`), not just the child's report back. The parent→child brief is part of the protocol surface — a child meets Mormor on the way in, which is what makes it answer in Mormor on the way out.
+Note the dispatch hops (0 and 1) below: the parent's brief *to* each child is itself in Mormor (`### goal:` + `### note:`), not just the child's report back — and it only delegates: the code plus what the child can't infer, not a checklist of what to find. The parent→child brief is part of the protocol surface — a child meets Mormor on the way in, which is what makes it answer in Mormor on the way out.
 
 ## Chain shape (5 hops)
 
@@ -46,158 +46,164 @@ Run this through your security reviewer AND your code-quality reviewer, then giv
 
 ## Benchmark results
 
-Sonnet 5 + Opus 5.5 + Fable 5.1, n=50 runs × 5 hops each, cheatsheet v4; quality is the mean across the 5 hops. Figures are **response-size** reduction vs baseline (cache-independent); for billed cost and the caching caveat, see the [README](../README.md#empirical-results).
+Sonnet 5 + Opus 5.5 + Fable 5.1, n=50 runs × 5 hops each, cheatsheet v5; quality is the mean across the 5 hops. Figures are **response-size** reduction vs baseline (cache-independent); for billed cost and the caching caveat, see the [README](../README.md#empirical-results).
 
 | variant | fable 5.1 size Δ | fable 5.1 quality | opus 5.5 size Δ | opus 5.5 quality | sonnet 5 size Δ | sonnet 5 quality |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: |
-| baseline | — | 4.93 | — | 4.93 | — | 4.95 |
-| terse | -33% | 4.93 | -17% | 4.95 | -32% | 4.95 |
-| **mormor (v4)** | **-59%** | **4.96** | **-42%** | **4.92** | **-73%** | **4.82** |
+| baseline | — | 4.93 | — | 4.93 | — | 4.92 |
+| terse | -32% | 4.98 | -17% | 4.95 | -27% | 4.94 |
+| **mormor (v5)** | **-76%** | **4.96** | **-71%** | **4.96** | **-71%** | **4.92** |
 
-note: this is where mormor's structural advantage shines hardest — compression compounds across the 5 hops, each agent's output shrinking the next agent's input. **Fable 5.1: ~26pts shorter than terse. Opus 5.5: ~25pts. Sonnet 5: ~41pts.** Quality holds at or near baseline on Fable 5.1 (4.96 vs 4.93) and Opus 5.5 (4.92 vs 4.93); on Sonnet 5 it runs a little softer (4.82 vs 4.95) in exchange for the largest billed win on that model.
+note: this is where mormor's structural advantage shines hardest — compression compounds across the 5 hops, each agent's output shrinking the next agent's input. **Fable 5.1: ~44pts shorter than terse. Opus 5.5: ~54pts. Sonnet 5: ~44pts.** Quality holds at or above baseline on all three (Fable 5.1 4.96 vs 4.93; Opus 5.5 4.96 vs 4.93; Sonnet 5 4.92 vs 4.92).
 
-## Sample exchange — Sonnet, run 0, mormor variant (all 5 hops)
+## Sample exchange — Sonnet 5, run 21, mormor v5 (all 5 hops)
 
 ### Hop 0 — parent → security child brief
 
-```
+````
 ### goal:
-security review of the following Python function before merge decision
+security review of PR function before merge; report findings in Mormor
 
 ### note:
-- part of a two-specialist review pipeline (security + code-quality); findings will be merged into a final merge recommendation
-- function accepts `user_id` from an unspecified call site — assume it may originate from user-controlled input
+code under review:
 
-[code block omitted]
-
-### note:
-assess injection vectors (SQLi via f-string interpolation), unsafe query patterns, data exposure risks (`SELECT *` returning full user row to caller), and any other security concerns
-
-### done:
-return findings as a `### case:` table with severity → finding → fix, using `must-fix` / `should-fix` / `nit`
+```python
+def process_user(user_id):
+    user = db.query(f"SELECT * FROM users WHERE id = {user_id}")
+    if user:
+        return user[0]
+    return None
 ```
+````
 
 ### Hop 1 — parent → quality child brief
 
-```
+````
 ### goal:
-review the following Python function for code quality before merge decision
+review code quality of `process_user` for PR merge; report findings in Mormor
 
 ### note:
-- security review running in parallel (separate specialist)
-- final merge recommendation will be compiled from both reviews
-- function is submitted as a PR; developer awaiting go/no-go
+security review handled by separate reviewer; skip injection analysis
 
-[code block omitted]
-
-### note:
-review for naming clarity (`process_user` — does it accurately describe behavior?), return-type consistency (returns `user[0]` or `None` with no type hints), error handling (no try/except around DB call), `SELECT *` over-fetching, brittle `user[0]` indexing, missing docstring or param annotation
-
-### done:
-deliver findings as a `### case:` table with severity (must-fix / should-fix / nit) + specific recommendation per issue
+```python
+def process_user(user_id):
+    user = db.query(f"SELECT * FROM users WHERE id = {user_id}")
+    if user:
+        return user[0]
+    return None
 ```
+````
 
 ### Hop 2 — security child report
 
 ````
-### case:
-severity → finding → fix
+### done:
+block merge: 1 must-fix, 2 should-fix
 
-| severity | finding | fix |
-| --- | --- | --- |
-| must-fix | SQL injection via f-string interpolation; `user_id` controls query | parameterized query: `db.query("SELECT * FROM users WHERE id = ?", (user_id,))` |
-| must-fix | no input type coercion before query | `user_id = int(user_id)` raises on non-numeric |
-| should-fix | `SELECT *` returns full row incl. password hash, tokens, PII | enumerate required columns explicitly |
-| should-fix | raw DB row leaks internal schema through return type | map result to a DTO/dataclass |
-| should-fix | no exception handling around `db.query()`; stack traces expose internals | try/except; log internally; re-raise sanitized |
-| nit | name `process_user` implies mutation; behavior is read-only lookup | rename to `get_user_by_id` |
+1. must-fix: SQL injection → `user_id` interpolated via f-string, e.g. `1 OR 1=1` returns all rows, `1; DROP TABLE users` runs a second statement on drivers allowing stacked queries
+2. should-fix: `SELECT *` → returns every column (password hash, tokens, PII) to callers
+3. should-fix: no type/format validation on `user_id`
+
+Fix:
+
+```python
+def process_user(user_id):
+    user = db.query(
+        "SELECT id, name, email FROM users WHERE id = %s",
+        (int(user_id),),
+    )
+    if user:
+        return user[0]
+    return None
+```
+
+### note:
+placeholder style `%s` assumed; use the `db` driver's paramstyle (`?`, `:id`)
+column list `id, name, email` is a placeholder; match what callers need
+`int(user_id)` raises `ValueError` on non-numeric input; assumes integer ids
 ````
 
 ### Hop 3 — quality child report
 
 ````
-### case:
-issue → severity → recommendation
+### done:
+code quality findings for `process_user`:
 
-| issue | severity | recommendation |
-| --- | --- | --- |
-| `process_user` misleads — behavior is fetch, not process | must-fix | rename to `get_user_by_id` |
-| f-string SQL interpolation | must-fix | parameterized query (flag for security reviewer too) |
-| no try/except around `db.query` | must-fix | wrap; catches `DatabaseError`; caller can distinguish "not found" from "DB down" |
-| `SELECT *` | should-fix | enumerate required columns; prevents breakage on schema changes |
-| `user[0]` — assumes sequence return | should-fix | assert/document return contract; use `db.query_one()` if available |
-| no return-type hint | should-fix | annotate `-> Optional[User]` |
-| no docstring / param annotation | nit | add one-liner + `:param user_id:` + `:returns:` |
+- name: `process_user` → misleading, only fetches; rename `get_user_by_id`
+- `SELECT *` → couples to schema column order/additions, over-fetches; list needed columns
+- no `LIMIT 1` → id is unique, still fetches full result set; add `LIMIT 1`
+- `user[0]` → returns raw row, shape undocumented; map to dataclass/dict
+- global `db` → hidden dependency, hard to unit test; inject as parameter
+- no type hints, no docstring → return type unclear (`row | None`)
+- if/else → collapsible to one expression
+- no tests → add found and not-found cases
 
-### note:
-- must-fix items individually sufficient to block merge; SQL injection overlaps security review — coordinate to avoid conflicting instructions
-- naming + error handling are independent fixes; can be addressed in same commit
+```python
+def get_user_by_id(db, user_id: int) -> User | None:
+    rows = db.query("SELECT id, name, email FROM users WHERE id = ? LIMIT 1", (user_id,))
+    return User(*rows[0]) if rows else None
+```
+
+### test:
+none in diff → add `test_get_user_by_id_found` and `test_get_user_by_id_missing`
 ````
 
 ### Hop 4 — parent synthesizes final review
 
 ````
 ### done:
-BLOCK MERGE — 3 confirmed must-fix items; SQL injection alone is sufficient to block
+block merge → 1 must-fix, 4 should-fix, 3 nits. Apply merged fix below, add tests, re-review.
 
 ### case:
-severity → finding → fix
+severity → finding → action
 
-| severity | finding | fix |
+| severity | finding | action |
 | --- | --- | --- |
-| must-fix | SQL injection via f-string interpolation | parameterized query: `db.query("SELECT * FROM users WHERE id = ?", (user_id,))` |
-| must-fix | no input type coercion before query | `user_id = int(user_id)` raises on non-numeric |
-| must-fix | no exception handling around `db.query()` | wrap in try/except, log internally, raise sanitized `UserLookupError` |
-| should-fix | `SELECT *` exposes all columns incl. secrets | enumerate required columns explicitly |
-| should-fix | raw DB row leaks schema | map to DTO/dataclass |
-| should-fix | `user[0]` assumes sequence return | assert/document contract; use `db.query_one()` if available |
-| should-fix | `process_user` misleads — behavior is read-only fetch | rename to `get_user_by_id` |
-| should-fix | no return-type hint | annotate `-> Optional[User]` |
-| nit | no docstring / param annotation | add one-liner + `:param user_id:` + `:returns:` |
+| must-fix | SQL injection: f-string interpolation of `user_id` (`1 OR 1=1` dumps table; stacked queries possible) | parameterized query |
+| should-fix | `SELECT *` → leaks password hash/tokens/PII, couples to schema | explicit column list |
+| should-fix | no validation of `user_id` | type hint `int`; coerce/validate at boundary |
+| should-fix | no tests | add `test_get_user_by_id_found`, `test_get_user_by_id_missing`, plus injection-string case |
+| should-fix | global `db` → hidden dependency, hard to test | inject as parameter |
+| nit | name `process_user` misleads (only fetches) | rename `get_user_by_id` |
+| nit | no `LIMIT 1` | add `LIMIT 1` |
+| nit | raw row returned, no type hints/docstring | map to `User`, annotate `User | None` |
 
-### note:
-two severity conflicts resolved before consolidation —
-- try/except: security said should-fix, quality said must-fix → escalated to must-fix
-- function rename: security said nit, quality said must-fix → settled at should-fix
+Merged fix:
 
-### note:
-suggested rewrite (incorporates all must-fix + should-fix):
 ```python
-@dataclass
-class User:
-    id: int
-    name: str
-    email: str
-
-def get_user_by_id(user_id: int) -> Optional[User]:
-    """Fetch user by id; returns None if not found."""
-    user_id = int(user_id)
-    try:
-        rows = db.query(
-            "SELECT id, name, email FROM users WHERE id = ?",
-            (user_id,),
-        )
-    except DatabaseError as e:
-        logger.error("user lookup failed: %s", e)
-        raise UserLookupError(f"could not retrieve user {user_id}") from e
-    return User(**rows[0]) if rows else None
+def get_user_by_id(db, user_id: int) -> User | None:
+    rows = db.query(
+        "SELECT id, name, email FROM users WHERE id = %s LIMIT 1",
+        (user_id,),
+    )
+    return User(*rows[0]) if rows else None
 ```
+
+### note:
+reviewers disagree on validation: security → `int(user_id)` coercion, quality → type hint only. Hints aren't enforced at runtime → validate/coerce at the caller boundary; parameterization alone already closes the injection
+placeholder: security used `%s`, quality used `?` → use the `db` driver's paramstyle
+column list `id, name, email` is a placeholder; match what callers need
+rename breaks existing callers of `process_user` → update call sites
+`User` type not defined in diff → assumed to exist or be added
+
+### test:
+none in diff → required before merge
 ````
 
-(Sample compressed for readability — actual hop-4 responses are typically ~400-500 tokens.)
+(Unedited responses from the v5 n=50 run — a run where every hop scored 5, with total size at the median.)
 
 ## Notes on compounding compression
 
 | metric | value |
 | --- | --- |
 | baseline response size (5 hops) | _high_ — verbose dispatch + verbose reports + verbose synthesis |
-| mormor response-size reduction (5 hops) | -59% fable 5.1, -42% opus 5.5, -73% sonnet 5 |
-| terse response-size reduction (5 hops) | -33% fable 5.1, -17% opus 5.5, -32% sonnet 5 |
-| **mormor's lead over terse** | **+26 pts fable 5.1, +25 pts opus 5.5, +41 pts sonnet 5** |
+| mormor response-size reduction (5 hops) | -76% fable 5.1, -71% opus 5.5, -71% sonnet 5 |
+| terse response-size reduction (5 hops) | -32% fable 5.1, -17% opus 5.5, -27% sonnet 5 |
+| **mormor's lead over terse** | **+44 pts fable 5.1, +54 pts opus 5.5, +44 pts sonnet 5** |
 
 Where mormor's structural advantage compounds:
-- **dispatch hops (0, 1)**: `goal:` + `note:` carry the brief tighter than prose framing
-- **review hops (2, 3)**: `case:` table for the quality review consolidates 7 issues into one structure
+- **dispatch hops (0, 1)**: `goal:` + `note:` carry the brief tighter than prose framing, and hand over the task without pre-solving it — the child gets no checklist or report spec to expand on
+- **review hops (2, 3)**: one line per finding, severity first; the fix is a minimal diff rather than a rewrite
 - **synthesis hop (4)**: parent inherits both children's compressed reports as input → cache cost lower → mormor's largest absolute saving
 
 The 5-hop fan-out is **the workload Mormor was designed for**. The empirical numbers confirm it.
