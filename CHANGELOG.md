@@ -5,6 +5,12 @@ Mormor uses two independent version axes:
 - **Cheatsheet version** (`v1`, `v2`, …) — the protocol artifact itself; bumps when the cheatsheet body changes. Every version is frozen in [`cheatsheets/`](./cheatsheets/); `cheatsheets/DEFAULT` names the recommended pick.
 - **Repo / release version** — [SemVer](https://semver.org/), the entries below. A cheatsheet change is a **minor** bump; benchmark re-runs, docs, and tooling are **patch** bumps with the cheatsheet unchanged. 0.x is experimental.
 
+## [0.5.1] — 2026-09-30
+
+Maintenance — **cheatsheet unchanged (still v5)**.
+
+- Added **Sonnet 5.5** as a tested model, replacing Sonnet 5 in the headline; Sonnet 5 moved to "Earlier results".
+
 ## [0.5.0] — 2026-09-29
 
 Cheatsheet **v4 → v5** — `cheatsheets/DEFAULT` now points to [`v5`](./cheatsheets/v5.md); v4 stays frozen.

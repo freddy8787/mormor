@@ -23,12 +23,12 @@ import os
 # more variable.
 MODELS = [
     ('opus',   'claude-opus-5-5'),
-    ('sonnet', 'claude-sonnet-5'),
+    ('sonnet', 'claude-sonnet-5-5'),
     ('fable',  'claude-fable-5-1'),
 ]
 
 # Used only when --smoke is passed. Single fast model for sanity checks.
-SMOKE_MODEL = ('sonnet', 'claude-sonnet-5')
+SMOKE_MODEL = ('sonnet', 'claude-sonnet-5-5')
 
 # Grader is held constant across model runs so quality is scored by a single
 # arbiter — eliminates "judge-bias by model under test" risk.
