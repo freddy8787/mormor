@@ -5,6 +5,15 @@ Mormor uses two independent version axes:
 - **Cheatsheet version** (`v1`, `v2`, …) — the protocol artifact itself; bumps when the cheatsheet body changes. Every version is frozen in [`cheatsheets/`](./cheatsheets/); `cheatsheets/DEFAULT` names the recommended pick.
 - **Repo / release version** — [SemVer](https://semver.org/), the entries below. A cheatsheet change is a **minor** bump; benchmark re-runs, docs, and tooling are **patch** bumps with the cheatsheet unchanged. 0.x is experimental.
 
+## [0.6.0] — 2026-10-02
+
+Cheatsheet **v5 → v6** — `cheatsheets/DEFAULT` now points to [`v6`](./cheatsheets/v6.md); v5 stays frozen.
+
+- **v6 cheatsheet:** v5's rules said once each, in well under half the size — cheaper on short one-line replies. Keep it above ~475 tokens if you trim it, or it falls under the cache minimum.
+- Re-validated at n=50 on Opus 5.5, Sonnet 5.5 and Fable 5.1. Fable 5.1 re-measured on the current model; its September results moved to "Earlier results".
+- `delegated_chain` example now shows a v6 run.
+- **Benchmark fix:** CLI server errors ("API Error: 5xx") are no longer recorded as responses.
+
 ## [0.5.1] — 2026-09-30
 
 Maintenance — **cheatsheet unchanged (still v5)**.

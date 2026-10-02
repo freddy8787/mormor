@@ -109,7 +109,7 @@ The `--resume` flag is **explicit** — there's no auto-detect. Pass the same fl
 ## Reliability
 
 - **Per-call atomic save:** rows are persisted incrementally (tmp file + rename) after each call. Mid-run crashes don't lose more than one row.
-- **Usage-limit notices:** when the plan limit is reached the CLI returns its limit notice ("You've hit your session limit ...") as ordinary assistant text with exit 0. The runner rejects these (`UsageLimitError`) and retries rather than recording them as responses — left unchecked they land in the CSV as real rows and silently poison every aggregate. If the limit outlasts the retry budget the run fails loudly and `--resume` picks it up later.
+- **Usage-limit notices:** when the plan limit is reached the CLI returns its limit notice ("You've hit your session limit ...") as ordinary assistant text with exit 0. The same goes for the CLI's server errors ("API Error: 529 Overloaded ..."). The runner rejects both (`UsageLimitError`) and retries rather than recording them as responses — left unchecked they land in the CSV as real rows and silently poison every aggregate. If the limit outlasts the retry budget the run fails loudly and `--resume` picks it up later.
 - **Retry:** transient SDK errors (e.g. "Command failed exit 1") get exponential-backoff retry — up to 7 retries (8 attempts total) before failing the call. Grader calls retry up to 4 times (5 attempts total); on exhaustion the row records `quality_score=0` and the run continues.
 - **Disallowed tools:** the agent runs with no tool access (no Task, Bash, Edit, etc.) so the benchmark measures system-prompt + user-prompt → text-response, with nothing else in the loop.
 

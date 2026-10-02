@@ -23,15 +23,15 @@ def process_user(user_id):
 
 ## Benchmark results
 
-Sonnet 5.5 + Opus 5.5 + Fable 5.1, n=50 runs each, cheatsheet v5. Figures are **response-size** reduction vs baseline (cache-independent); for billed cost and the caching caveat, see the [README](../README.md#empirical-results).
+Sonnet 5.5 + Opus 5.5 + Fable 5.1, n=50 runs each, cheatsheet v6. Figures are **response-size** reduction vs baseline (cache-independent); for billed cost and the caching caveat, see the [README](../README.md#empirical-results).
 
 | variant | fable 5.1 size Δ | fable 5.1 quality | opus 5.5 size Δ | opus 5.5 quality | sonnet 5.5 size Δ | sonnet 5.5 quality |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: |
 | baseline (verbose prose) | — | 5.00 | — | 5.00 | — | 5.00 |
-| terse (concise prose) | -44% | 5.00 | -26% | 5.00 | -42% | 5.00 |
-| **mormor (v5)** | **-43%** | **5.00** | **-46%** | **5.00** | **-41%** | **5.00** |
+| terse (concise prose) | -15% | 5.00 | -26% | 5.00 | -42% | 5.00 |
+| **mormor (v6)** | **-47%** | **5.00** | **-51%** | **5.00** | **-50%** | **5.00** |
 
-note: the `### case:` table makes mormor's compression structural rather than just "fewer words". mormor runs -46% on Opus 5.5 / -43% on Fable 5.1 / -41% on Sonnet 5.5, with quality at 5.00 on all three models. On Fable 5.1 and Sonnet 5.5 plain terse prose gets about as short here (-44% / -42%); mormor's edge on this scenario is the consistent severity table rather than size.
+note: the `### case:` table makes mormor's compression structural rather than just "fewer words". mormor runs -51% on Opus 5.5 / -50% on Sonnet 5.5 / -47% on Fable 5.1, with quality at 5.00 on all three models. On Sonnet 5.5 plain terse prose gets closer here (-42%); mormor's edge there is the consistent severity table as much as size.
 
 ## Responses (Sonnet samples)
 

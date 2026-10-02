@@ -46,27 +46,26 @@ Run this through your security reviewer AND your code-quality reviewer, then giv
 
 ## Benchmark results
 
-Sonnet 5.5 + Opus 5.5 + Fable 5.1, n=50 runs × 5 hops each, cheatsheet v5; quality is the mean across the 5 hops. Figures are **response-size** reduction vs baseline (cache-independent); for billed cost and the caching caveat, see the [README](../README.md#empirical-results).
+Sonnet 5.5 + Opus 5.5 + Fable 5.1, n=50 runs × 5 hops each, cheatsheet v6; quality is the mean across the 5 hops. Figures are **response-size** reduction vs baseline (cache-independent); for billed cost and the caching caveat, see the [README](../README.md#empirical-results).
 
 | variant | fable 5.1 size Δ | fable 5.1 quality | opus 5.5 size Δ | opus 5.5 quality | sonnet 5.5 size Δ | sonnet 5.5 quality |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: |
-| baseline | — | 4.93 | — | 4.93 | — | 4.91 |
-| terse | -32% | 4.98 | -17% | 4.95 | -30% | 4.86 |
-| **mormor (v5)** | **-76%** | **4.96** | **-71%** | **4.96** | **-71%** | **4.96** |
+| baseline | — | 4.95 | — | 4.93 | — | 4.91 |
+| terse | -18% | 4.98 | -17% | 4.95 | -30% | 4.86 |
+| **mormor (v6)** | **-69%** | **4.93** | **-72%** | **4.87** | **-67%** | **4.97** |
 
-note: this is where mormor's structural advantage shines hardest — compression compounds across the 5 hops, each agent's output shrinking the next agent's input. **Fable 5.1: ~44pts shorter than terse. Opus 5.5: ~54pts. Sonnet 5.5: ~41pts.** Quality holds at or above baseline on all three (Fable 5.1 4.96 vs 4.93; Opus 5.5 4.96 vs 4.93; Sonnet 5.5 4.96 vs 4.91).
+note: this is where mormor's structural advantage shines hardest — compression compounds across the 5 hops, each agent's output shrinking the next agent's input. **Fable 5.1: ~51pts shorter than terse. Opus 5.5: ~55pts. Sonnet 5.5: ~37pts.** Quality is above baseline on Sonnet 5.5 (4.97 vs 4.91) and slightly below on Fable 5.1 (4.93 vs 4.95) and Opus 5.5 (4.87 vs 4.93). On Opus 5.5 the dip is the brief to the code-quality reviewer: the grader marks down lean briefs that don't spell out what to review, while the reviewers' own reports still score 4.94–5.00.
 
-## Sample exchange — Sonnet 5, run 21, mormor v5 (all 5 hops)
+## Sample exchange — Sonnet 5.5, run 15, mormor v6 (all 5 hops)
 
 ### Hop 0 — parent → security child brief
 
 ````
 ### goal:
-security review of PR function before merge; report findings in Mormor
+Security review of PR function before merge. Report findings with severity and fix.
 
 ### note:
-code under review:
-
+Code under review:
 ```python
 def process_user(user_id):
     user = db.query(f"SELECT * FROM users WHERE id = {user_id}")
@@ -74,17 +73,17 @@ def process_user(user_id):
         return user[0]
     return None
 ```
+Caller, origin of `user_id`, and `db` library unknown; inspect repo if needed.
 ````
 
 ### Hop 1 — parent → quality child brief
 
 ````
 ### goal:
-review code quality of `process_user` for PR merge; report findings in Mormor
+review function for code quality before merge; report findings
 
 ### note:
-security review handled by separate reviewer; skip injection analysis
-
+input below; security is covered by a separate reviewer, so skip injection analysis
 ```python
 def process_user(user_id):
     user = db.query(f"SELECT * FROM users WHERE id = {user_id}")
@@ -98,108 +97,108 @@ def process_user(user_id):
 
 ````
 ### done:
-block merge: 1 must-fix, 2 should-fix
-
-1. must-fix: SQL injection → `user_id` interpolated via f-string, e.g. `1 OR 1=1` returns all rows, `1; DROP TABLE users` runs a second statement on drivers allowing stacked queries
-2. should-fix: `SELECT *` → returns every column (password hash, tokens, PII) to callers
-3. should-fix: no type/format validation on `user_id`
-
-Fix:
+Finding 1: SQL injection, severity critical
+- `user_id` is interpolated into the SQL via f-string → attacker-controlled input can alter the query
+- Example: `user_id = "1 OR 1=1"` returns all users; `"1; DROP TABLE users"` runs a second statement on drivers that allow it
+- Fix: parameterize
 
 ```python
 def process_user(user_id):
-    user = db.query(
-        "SELECT id, name, email FROM users WHERE id = %s",
-        (int(user_id),),
-    )
-    if user:
-        return user[0]
-    return None
+    user = db.query("SELECT id, name, email FROM users WHERE id = %s", (user_id,))
+    return user[0] if user else None
 ```
 
+Finding 2: `SELECT *` over-fetch, severity low
+- Returns every column, including any sensitive ones (password hash, tokens) → leaks if the caller serializes the row
+- Fix: list the needed columns, as above
+
+Finding 3: no input validation, severity low
+- Enforce `int` at the boundary, e.g. `user_id = int(user_id)` → rejects junk early
+- Defense in depth only; parameterization is the real fix
+
+Verdict: block merge until Finding 1 is fixed.
+
 ### note:
-placeholder style `%s` assumed; use the `db` driver's paramstyle (`?`, `:id`)
-column list `id, name, email` is a placeholder; match what callers need
-`int(user_id)` raises `ValueError` on non-numeric input; assumes integer ids
+- Placeholder is `%s` (psycopg2/MySQL style); use `?` for sqlite3, or `:id` for SQLAlchemy `text()`
+- Column list `id, name, email` is an assumption; match the real schema
+- Caller and `db` library not inspected; the injection holds regardless of the caller unless `user_id` is provably a trusted `int`, which this function doesn't enforce
+- No authorization check in the function; confirm the caller verifies the requester may read this user
 ````
 
 ### Hop 3 — quality child report
 
 ````
 ### done:
-code quality findings for `process_user`:
+Findings, most to least important:
+- name `process_user` misleads → it only fetches; rename `get_user` or `fetch_user`
+- `SELECT *` → couples callers to schema and column order; list needed columns
+- fetches all matching rows, uses only first → add `LIMIT 1` or use the driver's fetch-one call
+- returns raw row → callers depend on column positions; return a dataclass or mapping
+- global `db` → hard to test; pass as parameter or inject
+- no type hints, no docstring → signature and return shape (`row | None`) undocumented
+- if/return None block → collapse to a conditional expression
+- no tests → missing cases: user found, user absent
 
-- name: `process_user` → misleading, only fetches; rename `get_user_by_id`
-- `SELECT *` → couples to schema column order/additions, over-fetches; list needed columns
-- no `LIMIT 1` → id is unique, still fetches full result set; add `LIMIT 1`
-- `user[0]` → returns raw row, shape undocumented; map to dataclass/dict
-- global `db` → hidden dependency, hard to unit test; inject as parameter
-- no type hints, no docstring → return type unclear (`row | None`)
-- if/else → collapsible to one expression
-- no tests → add found and not-found cases
-
+Minimal fix, assuming a DB-API style `db` with `LIMIT` support:
 ```python
-def get_user_by_id(db, user_id: int) -> User | None:
-    rows = db.query("SELECT id, name, email FROM users WHERE id = ? LIMIT 1", (user_id,))
-    return User(*rows[0]) if rows else None
+def get_user(db, user_id: int) -> tuple | None:
+    rows = db.query("SELECT id, name, email FROM users WHERE id = ... LIMIT 1")
+    return rows[0] if rows else None
 ```
 
-### test:
-none in diff → add `test_get_user_by_id_found` and `test_get_user_by_id_missing`
+### note:
+injection skipped per request; the `...` stands in for the id filter, which the security reviewer owns
+column list `id, name, email` is a placeholder → use the real needed columns
 ````
 
 ### Hop 4 — parent synthesizes final review
 
 ````
 ### done:
-block merge → 1 must-fix, 4 should-fix, 3 nits. Apply merged fix below, add tests, re-review.
+Block merge. Fix SQL injection first; the rest are non-blocking.
 
-### case:
-severity → finding → action
-
-| severity | finding | action |
-| --- | --- | --- |
-| must-fix | SQL injection: f-string interpolation of `user_id` (`1 OR 1=1` dumps table; stacked queries possible) | parameterized query |
-| should-fix | `SELECT *` → leaks password hash/tokens/PII, couples to schema | explicit column list |
-| should-fix | no validation of `user_id` | type hint `int`; coerce/validate at boundary |
-| should-fix | no tests | add `test_get_user_by_id_found`, `test_get_user_by_id_missing`, plus injection-string case |
-| should-fix | global `db` → hidden dependency, hard to test | inject as parameter |
-| nit | name `process_user` misleads (only fetches) | rename `get_user_by_id` |
-| nit | no `LIMIT 1` | add `LIMIT 1` |
-| nit | raw row returned, no type hints/docstring | map to `User`, annotate `User | None` |
-
-Merged fix:
-
+Merged fix (parameterized + quality items):
 ```python
-def get_user_by_id(db, user_id: int) -> User | None:
+def get_user(db, user_id: int) -> tuple | None:
     rows = db.query(
         "SELECT id, name, email FROM users WHERE id = %s LIMIT 1",
         (user_id,),
     )
-    return User(*rows[0]) if rows else None
+    return rows[0] if rows else None
 ```
 
-### note:
-reviewers disagree on validation: security → `int(user_id)` coercion, quality → type hint only. Hints aren't enforced at runtime → validate/coerce at the caller boundary; parameterization alone already closes the injection
-placeholder: security used `%s`, quality used `?` → use the `db` driver's paramstyle
-column list `id, name, email` is a placeholder; match what callers need
-rename breaks existing callers of `process_user` → update call sites
-`User` type not defined in diff → assumed to exist or be added
+### case:
+| severity | finding | action |
+| --- | --- | --- |
+| critical | SQL injection: f-string interpolates `user_id` | must-fix: parameterize (`%s`, `(user_id,)`) |
+| low | `SELECT *` over-fetch, leaks sensitive columns, couples callers to schema | should-fix: list columns |
+| low | no input validation | optional: `int(user_id)` at boundary; defense in depth |
+| medium | fetches all rows, uses first | should-fix: `LIMIT 1` |
+| medium | name `process_user` misleads | should-fix: rename `get_user` (update callers) |
+| medium | global `db`, hard to test | should-fix: inject as parameter |
+| low | raw row return, positional column coupling | optional: dataclass or mapping |
+| low | no type hints, no docstring | optional: add hints as above, docstring |
+| low | no tests | should-fix: cases found, absent, injection-shaped input |
 
-### test:
-none in diff → required before merge
+### note:
+- placeholder `%s` is psycopg2/MySQL style; `?` for sqlite3, `:id` for SQLAlchemy `text()`
+- column list `id, name, email` assumed; match real schema
+- no authorization check in function; confirm caller verifies requester may read this user
+- caller and `db` library not inspected
+- reviewers' fixes agree; the only overlap is `SELECT *` → column list
+- rename and `db` parameter change the signature → update all call sites
 ````
 
-(Unedited responses from the v5 n=50 run — a run where every hop scored 5, with total size at the median.)
+(Unedited responses from the v6 n=50 run — a run where every hop scored 5, with total size near the median.)
 
 ## Notes on compounding compression
 
 | metric | value |
 | --- | --- |
 | baseline response size (5 hops) | _high_ — verbose dispatch + verbose reports + verbose synthesis |
-| mormor response-size reduction (5 hops) | -76% fable 5.1, -71% opus 5.5, -71% sonnet 5.5 |
-| terse response-size reduction (5 hops) | -32% fable 5.1, -17% opus 5.5, -30% sonnet 5.5 |
-| **mormor's lead over terse** | **+44 pts fable 5.1, +54 pts opus 5.5, +41 pts sonnet 5.5** |
+| mormor response-size reduction (5 hops) | -69% fable 5.1, -72% opus 5.5, -67% sonnet 5.5 |
+| terse response-size reduction (5 hops) | -18% fable 5.1, -17% opus 5.5, -30% sonnet 5.5 |
+| **mormor's lead over terse** | **+51 pts fable 5.1, +55 pts opus 5.5, +37 pts sonnet 5.5** |
 
 Where mormor's structural advantage compounds:
 - **dispatch hops (0, 1)**: `goal:` + `note:` carry the brief tighter than prose framing, and hand over the task without pre-solving it — the child gets no checklist or report spec to expand on

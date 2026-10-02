@@ -10,18 +10,18 @@ This is what I measured:
 
 | | baseline | terse | mormor |
 | --- | ---: | ---: | ---: |
-| **Fable 5.1** — billed Δ | — | -31% | **-46%** |
-| **Fable 5.1** — quality | 4.90 | 4.97 | 4.97 |
-| **Opus 5.5** — billed Δ | — | -21% | **-36%** |
-| **Opus 5.5** — quality | 4.97 | 4.97 | 4.98 |
-| **Sonnet 5.5** — billed Δ | — | -29% | **-35%** |
+| **Fable 5.1** — billed Δ | — | -14% | **-44%** |
+| **Fable 5.1** — quality | 4.98 | 4.98 | 4.94 |
+| **Opus 5.5** — billed Δ | — | -21% | **-46%** |
+| **Opus 5.5** — quality | 4.96 | 4.96 | 4.95 |
+| **Sonnet 5.5** — billed Δ | — | -29% | **-40%** |
 | **Sonnet 5.5** — quality | 4.97 | 4.94 | 4.97 |
 
-<sub>Billed Δ is vs the **baseline** (verbose-prose) variant; **terse** = "just be concise", **mormor** = the v5 cheatsheet. Quality is 1–5. Billed Δ is measured on the current Claude Code CLI, where the short baseline prompt caches too, so it understates the compression; on the cache-independent response size, mormor answers are **0.48× baseline** on Fable 5.1, **0.54×** on Opus 5.5, and **0.59×** on Sonnet 5.5 (see [Empirical results](#empirical-results)).</sub>
+<sub>Billed Δ is vs the **baseline** (verbose-prose) variant; **terse** = "just be concise", **mormor** = the v6 cheatsheet. Quality is 1–5. In the benchmark every prompt repeats across runs, so the baseline caches too and billed Δ understates the compression; on the cache-independent response size, mormor answers are **0.51× baseline** on Fable 5.1, **0.49×** on Opus 5.5, and **0.54×** on Sonnet 5.5 (see [Empirical results](#empirical-results)).</sub>
 
-Mormor saves the most on billed cost while holding quality at or near baseline on every model. Answers also come back faster — **about 41% quicker on Fable 5.1, ~37% on Opus 5.5, ~28% on Sonnet 5.5** — because there is less to write.
+Mormor saves the most on billed cost while holding quality at or near baseline on every model. Answers also come back faster — **about 36% quicker on Fable 5.1, ~35% on Opus 5.5, ~26% on Sonnet 5.5** — because there is less to write.
 
-The cheatsheet caches on all three models — it clears Anthropic's 1,024-token cache minimum, so the prefix bills at the cached rate. Nearly every scenario is a billed win; the exceptions are covered under [Empirical results](#empirical-results).
+The cheatsheet is about 570 tokens — above Anthropic's 512-token cache minimum on all three models, so it bills at the cached rate. Every scenario is a billed win except short one-line answers, which come out about even; see [Empirical results](#empirical-results).
 
 ### How Mormor works
 
@@ -79,13 +79,13 @@ Both cases are agent-to-agent, which is where Mormor saves the most (see the per
 
 **Pre-1.0.** Try it on an experimental project first to build confidence, and feel free to adapt the cheatsheet per-project if defaults don't fit your workflow. See [`CHANGELOG.md`](./CHANGELOG.md) for the current version.
 
-**Tested models.** Mormor's headline numbers are from Sonnet 5.5, Opus 5.5, and Fable 5.1 (the latest tested version of each), all on all 5 scenarios. Earlier Sonnet 5, Fable 5, Opus 5, Opus 4.8, Opus 4.7, and Sonnet 4.6 results are retained under [Earlier results](#earlier-results-superseded-model-versions). Haiku 4.5 was tested early on but consistently lost on billed cost on the smaller model, so it's not part of the tested set going forward.
+**Tested models.** Mormor's headline numbers are from Sonnet 5.5, Opus 5.5, and Fable 5.1 (the latest tested version of each), all on all 5 scenarios. Earlier Sonnet 5, Fable 5, Opus 5, Opus 4.8, Opus 4.7, and Sonnet 4.6 results — and Fable 5.1's September run — are retained under [Earlier results](#earlier-results-superseded-model-versions). Haiku 4.5 was tested early on but consistently lost on billed cost on the smaller model, so it's not part of the tested set going forward.
 
 ---
 
 ## Getting started
 
-There is nothing to install — Mormor is a vocabulary, not software. Open the current cheatsheet — [`cheatsheets/v5.md`](./cheatsheets/v5.md) (the recommended version; see [`cheatsheets/`](./cheatsheets/)) — paste it into your system prompt (or append it to `CLAUDE.md`), and use the labels in your messages. For a single agent that is the whole setup. Subagents need an extra step — see [Agent-to-agent setup](#agent-to-agent-setup).
+There is nothing to install — Mormor is a vocabulary, not software. Open the current cheatsheet — [`cheatsheets/v6.md`](./cheatsheets/v6.md) (the recommended version; see [`cheatsheets/`](./cheatsheets/)) — paste it into your system prompt (or append it to `CLAUDE.md`), and use the labels in your messages. For a single agent that is the whole setup. Subagents need an extra step — see [Agent-to-agent setup](#agent-to-agent-setup).
 
 ---
 
@@ -95,7 +95,7 @@ Agents that talk to other agents (and to users in scripted work) write a lot of 
 
 My idea is simple: a small set of labels lets the model drop the filler without losing meaning. The labels carry what the prose used to say between the lines ("here is the result", "here is some context", "here is a condition").
 
-The simplest alternative is just asking the model to be concise. In my benchmark that saves 21% (Opus 5.5) to 31% (Fable 5.1) on billed cost — useful on its own — but it stops there, because the savings come from fewer hedges, not from shorter structure. Mormor compresses further still (Fable 5.1 −46%, Opus 5.5 −36%, Sonnet 5.5 −35%) at about equal quality, and the biggest gaps are in agent-to-agent cases, where the labeled output is easy for the next agent to read.
+The simplest alternative is just asking the model to be concise. In my benchmark that saves 14% (Fable 5.1) to 29% (Sonnet 5.5) on billed cost — useful on its own — but it stops there, because the savings come from fewer hedges, not from shorter structure. Mormor compresses further still (Fable 5.1 −44%, Opus 5.5 −46%, Sonnet 5.5 −40%) at about equal quality, and the biggest gaps are in agent-to-agent cases, where the labeled output is easy for the next agent to read.
 
 ---
 
@@ -107,39 +107,49 @@ The headline table at the top aggregates 5 scenarios × 3 variants × 50 runs ea
 
 **Cost is all-in.** The `billed` numbers above are computed on the SDK's `output_tokens`, which includes any extended-thinking tokens the model generated before the visible response — not just displayed text. Mormor's compression edge therefore reflects real wallet impact with no hidden-thinking blind spot. Runs use the SDK's `effort='low'` setting to dampen extended thinking; results at higher effort levels may differ.
 
-**Caching note.** Billed savings assume the cheatsheet caches (cached input bills at 0.10×), which needs the prompt prefix to clear Anthropic's [1,024-token minimum](https://platform.claude.com/docs/en/build-with-claude/prompt-caching). The cheatsheet clears it on all three models, so it always caches. Whether the short *baseline* prompt caches depends on the client: on the current CLI it does, which narrows the billed gap without changing the compression. The cache-independent metrics — response-size ratio, latency, quality, compliance — are unaffected, and are the fairer comparison across models.
+**Caching note.** Billed savings assume the cheatsheet caches (cached input bills at 0.10×). The system prompt is cached as its own entry only above Anthropic's [minimum cacheable length](https://platform.claude.com/docs/en/build-with-claude/prompt-caching) — 512 tokens on Fable 5.1, Opus 5.5 and Sonnet 5.5 (1,024 on Sonnet 5 and Opus 4.8). v6 is about 570 tokens, so it caches; if you trim it, keep it above ~475 tokens, or it bills in full on every call. The *baseline* prompt is too short to cache on its own, but in the benchmark every prompt repeats across runs, so whole requests cache for all three variants — that narrows the billed gap without changing the compression. The cache-independent metrics — response-size ratio, latency, quality, compliance — are unaffected, and are the fairer comparison across models.
 
-### Per-scenario billed-cost reduction (mormor v5 vs baseline)
+### Per-scenario billed-cost reduction (mormor v6 vs baseline)
 
 | scenario | fable 5.1 | opus 5.5 | sonnet 5.5 |
 | --- | ---: | ---: | ---: |
-| `single_round_trip` (planning task) | -42% | -24% | -15% |
-| `branching` (security review) | -36% | -40% | -35% |
-| `multi_turn` (5-turn debugging) | -35% | -10% | -29% |
-| `high_frequency` (classification) | +25% | +33% | +21% |
-| `delegated_chain` (5-hop fan-out) | **-67%** | **-65%** | **-60%** |
+| `single_round_trip` (planning task) | -41% | -42% | -39% |
+| `branching` (security review) | -44% | -47% | -47% |
+| `multi_turn` (5-turn debugging) | -23% | -31% | -21% |
+| `high_frequency` (classification) | -6% | +7% | +2% |
+| `delegated_chain` (5-hop fan-out) | **-63%** | **-63%** | **-57%** |
 
-The strongest scenario on every model is the agent-to-agent `delegated_chain`, where compression compounds across hops. `high_frequency` is a billed loss on all three: a one-line answer leaves little to compress, so its saving used to come from caching — and once the baseline prompt caches as well, that disappears, even though mormor's answer is still 15–25% shorter. The cache-independent **response-size ratio** tells the cleaner compression story: responses are ~0.48× baseline on Fable 5.1, ~0.54× on Opus 5.5, and ~0.59× on Sonnet 5.5. Quality stays within 0.05 of baseline in every cell, and above it on Fable 5.1 and Opus 5.5.
+The strongest scenario on every model is the agent-to-agent `delegated_chain`, where compression compounds across hops. `high_frequency` is about even: a one-line answer leaves little to compress, while every call still reads the cheatsheet from cache — mormor's answers are 19–30% shorter, which roughly pays for that read. The cache-independent **response-size ratio** tells the cleaner compression story: responses are ~0.51× baseline on Fable 5.1, ~0.49× on Opus 5.5, and ~0.54× on Sonnet 5.5. Quality stays within 0.04 of baseline on every model.
 
-**v5 vs v4.** Newer models write tighter prose by default, which shrank v4's lead — on Opus 5.5 its answers were 0.66× baseline, against 0.39× on Opus 5. v5 was tuned for that: most of the extra length came from agent-to-agent briefs that pre-solved the child's task and prescribed a heavy report format, plus conditional caveats and full rewrites where a minimal fix would do. Against the same baselines, v5 takes Opus 5.5 from -25% to **-36%** billed (0.66× → 0.54× response size) and Fable 5.1 from -40% to **-46%** (0.56× → 0.48×), at equal quality. Sonnet 5's earlier -65% was measured in August; Sonnet 5 later started writing much longer answers under the same prompts, so that figure no longer described the model — measured side by side in September, v5 answers were ~22% shorter than v4's.
+**v6 vs v5.** v6 is a subtraction: v5's rules, each said once, in about 570 tokens instead of 1,460. Every call reads the cheatsheet from cache, so on a one-line answer v5 cost more than mormor saved — `high_frequency` was a +21% to +33% billed loss. v6 brings that to about even and makes the whole suite cheaper: against the same baselines, Opus 5.5 goes from -36% to **-46%** billed (0.54× → 0.49× response size) and Sonnet 5.5 from -35% to **-40%** (0.59× → 0.54×). The one-line coverage rule also stops Sonnet 5.5 over-specifying planning answers (`single_round_trip` -15% → -39%). Fable 5.1 started writing longer answers after its September run, so it was re-measured; side by side on the current model (n=15), v5 is -35% and v6 -45%.
 
 ### Where Mormor shines
 
-- **Agent-to-agent chains** — `delegated_chain` is Mormor's strongest scenario (-67% fable 5.1 / -65% opus 5.5 / -60% sonnet 5.5 billed). Compression compounds across hops; mormor's labeled outputs flow cleanly into downstream agents' inputs.
-- **Code review and decision tables** — `case:` directly satisfies a severity→action classification framework; baseline+terse use prose headings + bold which compress less. `branching` posts -40% opus 5.5 / -36% fable 5.1 / -35% sonnet 5.5 with quality at 5.00.
-- **Multi-turn work** — `multi_turn` wins across the board (-35% fable 5.1 / -29% sonnet 5.5 / -10% opus 5.5).
-- **Keeping the model on task** — on Fable 5.1 and Opus 5.5, the prose variants occasionally slip into a degenerate loop on code-investigation prompts, re-emitting the same tool call until the output limit (Fable 5.1: baseline 23 times, terse 4; Opus 5.5: baseline 4 — in 850 calls each). Mormor never did. These runs are excluded from the numbers above.
+- **Agent-to-agent chains** — `delegated_chain` is Mormor's strongest scenario (-63% fable 5.1 / -63% opus 5.5 / -57% sonnet 5.5 billed). Compression compounds across hops; mormor's labeled outputs flow cleanly into downstream agents' inputs.
+- **Code review and decision tables** — `case:` directly satisfies a severity→action classification framework; baseline+terse use prose headings + bold which compress less. `branching` posts -47% opus 5.5 / -47% sonnet 5.5 / -44% fable 5.1 with quality at 5.00.
+- **Planning tasks** — `single_round_trip` saves -39% to -42% on all three models with quality at 5.00 (4.98 on Sonnet 5.5).
+- **Keeping the model on task** — the prose variants occasionally slip into a degenerate loop on code-investigation prompts, re-emitting the same tool call until the output limit (Opus 5.5 baseline: 4 times in 850 calls; Fable 5.1 baseline: 23 times in its September run). Mormor never did. These runs are excluded from the numbers above.
 
 ### Where Mormor's compression doesn't pay as hard
 
-- **High-frequency atomic classification** — `high_frequency` is a small billed loss on all three models (+21% to +33%): a one-line answer leaves almost nothing to compress, so its saving came from caching rather than a shorter response, and on the current CLI the baseline prompt caches too. Mormor's answers are still 15–25% shorter. Fine to use — the payoff is just gone on billed cost.
-- **Planning tasks** — `single_round_trip` is the weakest billed cell on Sonnet 5.5 (-15%) and Opus 5.5 (-24%). The implied-coverage rule spends tokens to keep dimensions the prompt only implies (status codes, payload shapes, error bodies) — on Sonnet 5.5, mormor's planning answer runs longer than terse's. Quality stays at 5.00 on Fable 5.1 and Opus 5.5, and 4.98 on Sonnet 5.5.
+- **High-frequency atomic classification** — `high_frequency` is about even on billed cost (-6% Fable 5.1, +2% Sonnet 5.5, +7% Opus 5.5): a one-line answer leaves little to compress, and every call still reads the cheatsheet from cache. Mormor's answers are 19–30% shorter, which roughly pays for that read.
+- **Multi-turn debugging** — `multi_turn` saves least of the multi-call scenarios (-21% Sonnet 5.5, -23% Fable 5.1, -31% Opus 5.5). On Fable 5.1 its quality is 4.87 against 4.96 baseline: a brief follow-up turn occasionally drops a step the grader expects.
 
 Per-scenario breakdowns, full methodology, and reproduction steps: [`bench/README.md`](./bench/README.md). Per-scenario sample exchanges live in [`examples/`](./examples/).
 
 ### Earlier results (superseded model versions)
 
-Kept for reference as models advance. The headline above uses the latest tested version of each model; older runs move here — including Sonnet 5's August run, from before the model's behaviour changed.
+Kept for reference as models advance. The headline above uses the latest tested version of each model; older runs move here — including runs from before a model's behaviour changed (Sonnet 5 in August, Fable 5.1 in September).
+
+**Fable 5.1, September 2026** (n=50, cheatsheet v5 — superseded: Fable 5.1 later changed behaviour, re-measured above):
+
+| variant | billed Δ | quality |
+| --- | ---: | ---: |
+| baseline | — | 4.90 |
+| terse | -31% | 4.97 |
+| **mormor** | **-46%** | **4.97** |
+
+Per-scenario (mormor vs baseline): `single_round_trip` -42%, `branching` -36%, `multi_turn` -35%, `high_frequency` +25%, `delegated_chain` -67%. Response size 0.48× baseline.
 
 **Sonnet 5, September 2026** (n=50, cheatsheet v5 — superseded by Sonnet 5.5):
 

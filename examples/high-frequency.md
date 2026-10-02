@@ -26,15 +26,15 @@ The benchmark runs 5 different subjects through this template:
 
 ## Benchmark results
 
-Sonnet 5.5 + Opus 5.5 + Fable 5.1, n=50 runs × 5 emails each, cheatsheet v5. Figures are **response-size** reduction vs baseline (cache-independent); for billed cost and the caching caveat, see the [README](../README.md#empirical-results).
+Sonnet 5.5 + Opus 5.5 + Fable 5.1, n=50 runs × 5 emails each, cheatsheet v6. Figures are **response-size** reduction vs baseline (cache-independent); for billed cost and the caching caveat, see the [README](../README.md#empirical-results).
 
 | variant | fable 5.1 size Δ | fable 5.1 quality | opus 5.5 size Δ | opus 5.5 quality | sonnet 5.5 size Δ | sonnet 5.5 quality |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: |
 | baseline (verbose prose) | — | 5.00 | — | 5.00 | — | 5.00 |
 | terse (concise prose) | -9% | 5.00 | -7% | 5.00 | -11% | 5.00 |
-| **mormor (v5)** | **-23%** | **5.00** | **-15%** | **5.00** | **-25%** | **5.00** |
+| **mormor (v6)** | **-30%** | **5.00** | **-19%** | **5.00** | **-21%** | **5.00** |
 
-note: this is Mormor's weakest scenario — the baseline is already a one-line classification + reason, so there's little to compress; the `### done:`/`### note:` labels add a little structure, leaving mormor only modestly smaller than baseline (-15% to -25%). Quality is perfect (5.00 across the board). On **billed** cost it's a small loss on all three models: with a one-line answer the saving used to come from caching rather than a shorter response, and on the current CLI the baseline prompt caches too (see the [README](../README.md#empirical-results)).
+note: this is Mormor's weakest scenario — the baseline is already a one-line classification + reason, so there's little to compress; the `### done:`/`### note:` labels add a little structure, leaving mormor only modestly smaller than baseline (-19% to -30%). Quality is perfect (5.00 across the board). On **billed** cost it's about even (-6% Fable 5.1, +2% Sonnet 5.5, +7% Opus 5.5): every call still reads the cheatsheet from cache, and the shorter answer roughly pays for that read. v6 shrank the cheatsheet for exactly this case — under v5 it was a +21% to +33% loss (see the [README](../README.md#empirical-results)).
 
 ## Sample responses (Sonnet, first email — `Your order #12345 has shipped` → transactional)
 

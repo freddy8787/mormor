@@ -173,7 +173,8 @@ csv.field_size_limit(sys.maxsize)
 
 
 class UsageLimitError(RuntimeError):
-    """The CLI printed a plan/usage-limit notice instead of a model response.
+    """The CLI printed a plan/usage-limit notice or an API error instead of a
+    model response.
 
     It arrives as ordinary assistant text with exit 0, so nothing else marks
     it as a failure — left unchecked it lands in the CSV as a real response
@@ -181,10 +182,12 @@ class UsageLimitError(RuntimeError):
     """
 
 
-# Matches the CLI's limit notices, e.g.
-# "You've hit your session limit · resets 3:50pm (Asia/Bangkok)".
+# Matches the CLI's limit notices and API errors, e.g.
+# "You've hit your session limit · resets 3:50pm (Asia/Bangkok)",
+# "API Error: 529 Overloaded. This is a server-side issue, ...".
 _LIMIT_RE = re.compile(
-    r"(hit your (session|usage|plan) limit"
+    r"(^\s*API Error: \d{3}"
+    r"|hit your (session|usage|plan) limit"
     r"|resets \d{1,2}(:\d{2})?\s*[ap]m"
     r"|upgrade to increase your usage limit"
     r"|rate limit exceeded)",
